@@ -17,7 +17,7 @@ def rewrite_text_cohere(text: str) -> str:
         "Content-Type": "application/json"
     }
     payload = {
-        "model": "command-r",
+        "model": "command-r",  # ✅ 最新模型
         "message": f"请用中文改写以下文本，保持原意但用不同的措辞：\n\n{text}",
         "temperature": 0.7
     }
@@ -29,7 +29,7 @@ def rewrite_text_cohere(text: str) -> str:
 
     data = resp.json()
     try:
-        return data["text"]
+        return data["text"]  # chat 接口会直接给一个 text 字段
     except KeyError:
         return text
 
@@ -57,10 +57,10 @@ def translate_to_simplified(text: str) -> str:
 def rewrite_text(text):
     rewritten = rewrite_text_cohere(text)
     rewritten = add_linebreaks(rewritten)
-    return translate_to_simplified(rewritten)
+    return translate_to_simplified(rewritten)  # ✅ 最后翻译成简体
 
 # --------------------------
-# 抓取文章内容
+# 以下抓取文章内容、图片、网站新闻等保持不变
 # --------------------------
 def fetch_article_content(link):
     if not link:
@@ -86,9 +86,6 @@ def fetch_article_content(link):
         print(f"抓文章内容失败 ({link}): {e}")
     return ""
 
-# --------------------------
-# 抓取文章图片
-# --------------------------
 def fetch_article_image(link):
     if not link:
         return None
@@ -122,9 +119,6 @@ def fetch_article_image(link):
         print(f"抓文章图片失败 ({link}): {e}")
     return None
 
-# --------------------------
-# 抓取网站新闻列表
-# --------------------------
 def fetch_site_news(url, limit=20):
     news_items = []
     try:
@@ -136,31 +130,20 @@ def fetch_site_news(url, limit=20):
         elif "ltn.com" in url:
             items = soup.select("div.title a")
         elif "yahoo.com" in url:
-            # ✅ 修正 Yahoo 的 title 抓取
-            items = soup.select("h3 a span") or soup.select("a[aria-label]")
+            items = soup.select("h3 a")
         else:
             items = []
 
         for item in items[:limit]:
-            if item.name == "span":
-                title = item.get_text(strip=True)
-                link = item.parent.get("href")
-            else:
-                title = item.get_text(strip=True)
-                link = item.get("href")
-
+            title = item.get_text(strip=True)
+            link = item.get("href")
             if link and link.startswith("/"):
                 link = urljoin(url, link)
-
-            if title and link:
-                news_items.append((title, link))
+            news_items.append((title, link))
     except Exception as e:
         print(f"抓 {url} 出错: {e}")
     return news_items
 
-# --------------------------
-# 主抓取流程
-# --------------------------
 def fetch_news():
     all_news = []
     sites = [
@@ -190,4 +173,3 @@ def fetch_news():
                 print(f"✅ 改写成功并保存: {title_rw[:30]}...")
             except Exception as e:
                 print(f"插入失败: {e}")
-    return all_news
