@@ -70,7 +70,12 @@ def fetch_article_content(link):
         soup = BeautifulSoup(resp.text, "html.parser")
 
         if "udn.com" in link:
-            div = soup.select_one("div#story_body_content")
+           div = (
+                soup.select_one("section.article-content__editor")
+                or soup.select_one("div.article-content__editor")
+                or soup.select_one("div#article_body")
+                or soup.select_one("div#story_body_content")  # 兜底旧版
+            )
         elif "ltn.com" in link:
             div = soup.select_one("div.text")
         elif "yahoo.com" in link:
