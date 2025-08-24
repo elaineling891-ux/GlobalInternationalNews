@@ -63,6 +63,29 @@ def get_all_news(skip=0, limit=20):
         })
     return news
 
+def get_news_by_id(news_id: int):
+    conn = psycopg2.connect(DB_URL)
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT id, title, content, link, image_url, created_at
+        FROM news
+        WHERE id=%s
+        LIMIT 1
+    """, (news_id,))
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+    if not row:
+        return None
+    return {
+        "id": row[0],
+        "title": row[1],
+        "content": row[2],
+        "link": row[3],
+        "image_url": row[4],
+        "created_at": row[5],
+    }
+
 
 def news_exists(link: str) -> bool:
     """检查数据库里是否已经有这个链接"""
