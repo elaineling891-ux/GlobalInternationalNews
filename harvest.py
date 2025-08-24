@@ -143,7 +143,7 @@ def fetch_site_news(url, limit=20):
 
         if "udn.com" in url:
             items = soup.select("div.story-list__text a")
-       elif "ltn.com" in url:
+        elif "ltn.com" in url:
             # LTN 首页和 breakingnews 页用这个 selector 就能抓到新闻链接
             items = soup.select("ul.list a")
         elif "yahoo.com" in url:
