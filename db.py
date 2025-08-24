@@ -62,22 +62,17 @@ def get_news(limit=20, offset=0):
         for r in rows
     ]
 
-def get_all_news(limit=20):
-    conn = psycopg2.connect(DB_URL)
-    cur = conn.cursor()
-    cur.execute("SELECT id, title, content, image_url, created_at FROM news ORDER BY created_at DESC LIMIT %s", (limit,))
-    rows = cur.fetchall()
-    cur.close()
+def get_all_news(skip=0, limit=20):
+    conn = sqlite3.connect(DB_NAME)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT * FROM news ORDER BY created_at DESC LIMIT ? OFFSET ?",
+        (limit, skip)
+    )
+    rows = cursor.fetchall()
     conn.close()
-    return [
-        {
-            "id": r[0],
-            "title": r[1],
-            "content": r[2],
-            "image_url": r[3],
-            "created_at": r[4]
-        } for r in rows
-    ]
+    return [dict(row) for row in rows]
 
 def news_exists(link: str) -> bool:
     """检查数据库里是否已经有这个链接"""
