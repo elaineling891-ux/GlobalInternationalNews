@@ -259,7 +259,7 @@ def fetch_news():
     return all_news
 
 def remove_comma_after_punct(title: str) -> str:
-    # 替换 “。,” 或 “！,” 为 “。” 或 “！”  
+    # 替换 “。,” 或 “！,” 或 “？,” 为 “。” 或 “！” 或 “？”  
     title = title.replace("。,", "。").replace("！,", "！").replace("？,", "？")
     return title
 
