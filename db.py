@@ -3,6 +3,7 @@ import os
 
 DB_URL = os.getenv("DATABASE_URL")
 
+
 def init_db():
     conn = psycopg2.connect(DB_URL)
     cur = conn.cursor()
@@ -11,18 +12,18 @@ def init_db():
         id SERIAL PRIMARY KEY,
         title TEXT NOT NULL,
         content TEXT,
-        link TEXT,
+        link TEXT UNIQUE,
         image_url TEXT,
         -- 存本地时间（新加坡），无时区
         created_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'Asia/Singapore'),
-        UNIQUE(title),
-        UNIQUE(link)
+        UNIQUE(title)
     )
     """)
     conn.commit()
     cur.close()
     conn.close()
     print("✅ 数据库初始化完成（created_at=SGT）")
+
 
 def insert_news(title, content, link=None, image_url=None):
     conn = psycopg2.connect(DB_URL)
@@ -38,18 +39,30 @@ def insert_news(title, content, link=None, image_url=None):
 
 
 def get_all_news(skip=0, limit=20):
-    conn = psycopg2.connect(DB_NAME)
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-   cursor.execute("""
-    SELECT id, title, content, link, image_url, created_at
-    FROM news
-    ORDER BY created_at DESC
-    LIMIT %s OFFSET %s
-""", (limit, offset))
-    rows = cursor.fetchall()
+    conn = psycopg2.connect(DB_URL)
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT id, title, content, link, image_url, created_at
+        FROM news
+        ORDER BY created_at DESC
+        LIMIT %s OFFSET %s
+    """, (limit, skip))
+    rows = cur.fetchall()
+    cur.close()
     conn.close()
-    return [dict(row) for row in rows]
+
+    news = []
+    for row in rows:
+        news.append({
+            "id": row[0],
+            "title": row[1],
+            "content": row[2],
+            "link": row[3],
+            "image_url": row[4],
+            "created_at": row[5],
+        })
+    return news
+
 
 def news_exists(link: str) -> bool:
     """检查数据库里是否已经有这个链接"""
