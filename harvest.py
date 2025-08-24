@@ -130,8 +130,7 @@ def fetch_site_news(url, limit=20):
         elif "ltn.com" in url:
             items = soup.select("div.title a")
         elif "yahoo.com" in url:
-            # Yahoo 首页不一定固定 h3 a，用 a[href*="/news/"] 更稳
-            items = soup.select("a[href*='/news/']")
+            items = soup.select("h3 a")
         else:
             items = []
 
@@ -141,25 +140,20 @@ def fetch_site_news(url, limit=20):
             if link and link.startswith("/"):
                 link = urljoin(url, link)
 
-            # 针对 Yahoo：强制进入详情页抓真正标题
+            # 针对 Yahoo 文章，进入详情页抓 <meta property="og:title">
             if "yahoo.com" in url and link and link.startswith("http"):
                 try:
-                    article_res = requests.get(link, timeout=10)
+                    article_res = requests.get(link, headers=headers, timeout=10)
                     article_soup = BeautifulSoup(article_res.text, "html.parser")
                     og_title = article_soup.select_one("meta[property='og:title']")
                     if og_title and og_title.get("content"):
                         title = og_title["content"].strip()
-                    else:
-                        h1 = article_soup.select_one("h1")
-                        if h1:
-                            title = h1.get_text(strip=True)
-                        elif article_soup.title:
-                            title = article_soup.title.string.strip()
+                    elif article_soup.title:
+                        title = article_soup.title.string.strip()
                 except Exception as e:
                     print(f"Yahoo 抓文章标题失败: {e}")
 
             news_items.append((title, link))
-
     except Exception as e:
         print(f"抓 {url} 出错: {e}")
     return news_items
@@ -192,4 +186,4 @@ def fetch_news():
                 })
                 print(f"✅ 改写成功并保存: {title_rw[:30]}...")
             except Exception as e:
-                print(f"插入失败: {e}")
+                print(f"插入失败: {e}")可以帮我修改yahoo selector吗
