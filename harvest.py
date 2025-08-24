@@ -238,6 +238,7 @@ def fetch_news():
 
             try:
                 title_rw = rewrite_text(title)
+                title_rw = remove_comma_after_punct(title_rw)
                 content_rw = rewrite_text(content)
 
                 insert_news(title_rw, content_rw, link, image_url)
@@ -256,4 +257,9 @@ def fetch_news():
 
     print(f"\n📊 本次共成功保存 {len(all_news)} 条新闻")
     return all_news
+
+def remove_comma_after_punct(title: str) -> str:
+    # 替换 “。,” 或 “！,” 为 “。” 或 “！”  
+    title = title.replace("。,", "。").replace("！,", "！").replace("？,", "？")
+    return title
 
