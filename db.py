@@ -66,10 +66,12 @@ def get_all_news(skip=0, limit=20):
     conn = psycopg2.connect(DB_NAME)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    cursor.execute(
-        "SELECT * FROM news ORDER BY created_at DESC LIMIT ? OFFSET ?",
-        (limit, skip)
-    )
+   cursor.execute("""
+    SELECT id, title, content, link, image_url, created_at
+    FROM news
+    ORDER BY created_at DESC
+    LIMIT %s OFFSET %s
+""", (limit, offset))
     rows = cursor.fetchall()
     conn.close()
     return [dict(row) for row in rows]
