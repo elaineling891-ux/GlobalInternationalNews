@@ -36,6 +36,32 @@ def insert_news(title, content, link=None, image_url=None):
     cur.close()
     conn.close()
 
+def get_news(limit=20, offset=0):
+    conn = psycopg2.connect(DB_URL)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT id, title, url, content, image_url, source, created_at
+        FROM news
+        ORDER BY created_at DESC
+        LIMIT ? OFFSET ?
+    """, (limit, offset))
+    rows = cursor.fetchall()
+    conn.close()
+
+    # 转换成字典方便前端用
+    return [
+        {
+            "id": r[0],
+            "title": r[1],
+            "url": r[2],
+            "content": r[3],
+            "image_url": r[4],
+            "source": r[5],
+            "created_at": r[6],
+        }
+        for r in rows
+    ]
+
 def get_all_news(limit=20):
     conn = psycopg2.connect(DB_URL)
     cur = conn.cursor()
