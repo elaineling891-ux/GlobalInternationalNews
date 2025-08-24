@@ -1,7 +1,7 @@
 import asyncio
 import os
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
 from fastapi.templating import Jinja2Templates
 from db import get_all_news, init_db
 from harvest import fetch_news
@@ -92,6 +92,10 @@ async def contact(request: Request):
 @app.get("/privacy", response_class=HTMLResponse)
 async def privacy(request: Request):
     return templates.TemplateResponse("privacy.html", {"request": request})
+
+@app.get("/ads.txt", response_class=PlainTextResponse)
+async def ads_txt():
+    return "google.com, pub-2460023182833054, DIRECT, f08c47fec0942fa0"
 
 # --------------------------
 # Uvicorn 入口
