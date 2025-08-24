@@ -4,8 +4,11 @@
   <meta charset="UTF-8">
   <title>新闻聚合</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <!-- Adsense 脚本 -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2460023182833054"
      crossorigin="anonymous"></script>
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body { background-color: #f9f9f9; font-family: "Microsoft YaHei", sans-serif; }
@@ -20,9 +23,30 @@
     footer { margin-top: 40px; text-align: center; padding: 20px; background-color: #f1f1f1; font-size: 0.9rem; color: #666; }
     footer a { color: #007bff; text-decoration: none; margin: 0 5px; }
     footer a:hover { text-decoration: underline; }
+
+    /* 广告样式 */
+    .ads-top, .ads-bottom {
+        display: block;
+        text-align: center;
+        margin: 15px 0;
+    }
   </style>
 </head>
 <body>
+
+<!-- 顶部广告（标题下方） -->
+<div class="ads-top">
+  <ins class="adsbygoogle"
+       style="display:block"
+       data-ad-client="ca-pub-2460023182833054"
+       data-ad-slot="1234567890"
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
+  <script>
+       (adsbygoogle = window.adsbygoogle || []).push({});
+  </script>
+</div>
+
 <nav class="navbar navbar-expand-lg">
   <div class="container">
     <a class="navbar-brand" href="/">新闻聚合平台</a>
@@ -52,6 +76,19 @@
   <div id="end-message" class="text-center mt-3 text-muted" style="display: none;">
     没有更多新闻了
   </div>
+</div>
+
+<!-- 底部广告（内容和 footer 之间） -->
+<div class="ads-bottom">
+  <ins class="adsbygoogle"
+       style="display:block"
+       data-ad-client="ca-pub-2460023182833054"
+       data-ad-slot="0987654321"
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
+  <script>
+       (adsbygoogle = window.adsbygoogle || []).push({});
+  </script>
 </div>
 
 <footer>
@@ -109,12 +146,12 @@ async function loadNews() {
             // 处理时间格式 -> YYYY-MM-DD HH:MM
             let formattedDate = item.created_at;
             if (formattedDate.includes(".")) {
-                formattedDate = formattedDate.split(".")[0]; // 去掉毫秒
+                formattedDate = formattedDate.split(".")[0];
             }
             if (formattedDate.includes("T")) {
-                formattedDate = formattedDate.replace("T", " "); // 兼容 ISO 格式
+                formattedDate = formattedDate.replace("T", " ");
             }
-            formattedDate = formattedDate.slice(0, 16); // 保留到分钟
+            formattedDate = formattedDate.slice(0, 16);
             date.textContent = formattedDate;
 
             div.appendChild(title);
@@ -136,7 +173,7 @@ async function loadNews() {
 // 初始加载
 loadNews();
 
-// 监听滚动事件，接近底部时加载更多
+// 滚动加载更多
 window.addEventListener("scroll", () => {
     if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
         loadNews();
