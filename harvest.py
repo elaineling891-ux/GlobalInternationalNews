@@ -77,7 +77,11 @@ def fetch_article_content(link):
                 or soup.select_one("div#story_body_content")  # 兜底旧版
             )
         elif "ltn.com" in link:
-            div = soup.select_one("div.text")
+            div = (
+                soup.select_one("div.text")
+                or soup.select_one("div.cont")
+                or soup.select_one("div#newsContent")
+            )
         elif "yahoo.com" in link:
             div = soup.select_one("article")
         else:
