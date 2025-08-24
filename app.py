@@ -45,15 +45,14 @@ async def home(request: Request):
 # --------------------------
 @app.get("/news/{news_id}", response_class=HTMLResponse)
 async def news_detail(request: Request, news_id: int):
-    news_list = get_all_news()
-    for item in news_list:
-        if item["id"] == news_id:  # 用数据库 id 匹配
-            return templates.TemplateResponse("detail.html", {
-                "request": request,
-                "news_item": item,
-                "year": datetime.now().year
-            })
-    return HTMLResponse(content="新闻不存在", status_code=404)
+    news_item = get_news_by_id(news_id)
+    if not news_item:
+        return HTMLResponse(content="新闻不存在", status_code=404)
+    return templates.TemplateResponse("detail.html", {
+        "request": request,
+        "news_item": news_item,
+        "year": datetime.now().year
+    })
 
 @app.get("/api/news", response_class=JSONResponse)
 async def api_news(skip: int = 0, limit: int = 20):
