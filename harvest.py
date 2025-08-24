@@ -100,11 +100,22 @@ def fetch_article_image(link):
         img_url = None
 
         if "udn.com" in link:
-            div = soup.select_one("div#story_body_content")
-            if div:
-                img = div.find("img")
-                if img:
-                    img_url = img.get("data-src") or img.get("src")
+             # ✅ 先抓 og:image / twitter:image
+            meta = soup.select_one('meta[property="og:image"]') or soup.select_one('meta[name="twitter:image"]')
+            if meta:
+                img_url = meta.get("content")
+
+            # 如果 meta 没有，再退回正文
+            if not img_url:
+                div = (
+                    soup.select_one("div#story_body_content")
+                    or soup.select_one("section.article-content__editor")
+                )
+                if div:
+                    img = div.find("img")
+                    if img:
+                        img_url = img.get("data-src") or img.get("src")
+           
         elif "ltn.com" in link:
             div = soup.select_one("div.text")
             if div:
