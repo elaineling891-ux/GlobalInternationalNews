@@ -4,6 +4,7 @@ from db import insert_news, news_exists
 import time
 from urllib.parse import urljoin
 from deep_translator import GoogleTranslator
+import re
 
 # --------------------------
 # 初始化 Cohere 改写 API
@@ -263,7 +264,7 @@ def fetch_news():
     return all_news
 
 def remove_comma_after_punct(title: str) -> str:
-    # 替换 “。,” 或 “！,” 或 “？,” 为 “。” 或 “！” 或 “？”  
-    title = title.replace("。,", "。").replace("！,", "！").replace("？,", "？")
+    # 替换句号、感叹号、问号后面紧跟的中英文逗号
+    title = re.sub(r'([。！？])[,，]+', r'\1', title)
     return title
 
