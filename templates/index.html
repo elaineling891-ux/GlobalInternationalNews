@@ -104,12 +104,15 @@ async function loadNews() {
             const date = document.createElement("div");
             date.className = "news-date";
 
-            // 处理时间格式，只保留到分钟
+            // 处理时间格式 -> YYYY-MM-DD HH:MM
             let formattedDate = item.created_at;
             if (formattedDate.includes(".")) {
                 formattedDate = formattedDate.split(".")[0]; // 去掉毫秒
             }
-            formattedDate = formattedDate.slice(0, 16); // "YYYY-MM-DD HH:MM"
+            if (formattedDate.includes("T")) {
+                formattedDate = formattedDate.replace("T", " "); // 兼容 ISO 格式
+            }
+            formattedDate = formattedDate.slice(0, 16); // 保留到分钟
             date.textContent = formattedDate;
 
             div.appendChild(title);
