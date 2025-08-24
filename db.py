@@ -1,6 +1,5 @@
 import psycopg2
 import os
-import sqlite3
 
 DB_URL = os.getenv("DATABASE_URL")
 
@@ -64,7 +63,7 @@ def get_news(limit=20, offset=0):
     ]
 
 def get_all_news(skip=0, limit=20):
-    conn = sqlite3.connect(DB_NAME)
+    conn = psycopg2.connect(DB_NAME)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     cursor.execute(
