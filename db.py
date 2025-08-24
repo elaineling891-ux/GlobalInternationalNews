@@ -13,7 +13,8 @@ def init_db():
         content TEXT,
         link TEXT,
         image_url TEXT,
-        created_at TIMESTAMP DEFAULT NOW(),
+        -- 存本地时间（新加坡），无时区
+        created_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'Asia/Singapore'),
         UNIQUE(title),
         UNIQUE(link)
     )
@@ -21,7 +22,7 @@ def init_db():
     conn.commit()
     cur.close()
     conn.close()
-    print("✅ 数据库初始化完成")
+    print("✅ 数据库初始化完成（created_at=SGT）")
 
 def insert_news(title, content, link=None, image_url=None):
     conn = psycopg2.connect(DB_URL)
