@@ -73,7 +73,7 @@ async def check_db():
 # --------------------------
 # 手动抓新闻接口
 # --------------------------
-@app.post("/manual_fetch")
+@app.api_route("/manual_fetch", methods=["GET", "POST"])
 async def manual_fetch():
     try:
         new_news = await asyncio.get_event_loop().run_in_executor(None, fetch_news)
