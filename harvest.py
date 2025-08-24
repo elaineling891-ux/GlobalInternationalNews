@@ -178,23 +178,46 @@ def fetch_news():
     ]
 
     for url in sites:
-        for title, link in fetch_site_news(url, limit=20):
-            if not link or news_exists(link):
+        print(f"\n🌍 正在抓取站点: {url}")
+        site_news = fetch_site_news(url, limit=20)
+
+        if not site_news:
+            print(f"⚠️ {url} 没有抓到新闻")
+            continue
+
+        for title, link in site_news:
+            if not link:
+                print(f"❌ 跳过：标题 [{title}] 没有链接")
                 continue
+            if news_exists(link):
+                print(f"⏩ 已存在: {link}")
+                continue
+
             content = fetch_article_content(link)
             if not content:
+                print(f"❌ 跳过：[{title}] 没有正文内容")
                 continue
+
             image_url = fetch_article_image(link)
-            title_rw = rewrite_text(title)
-            content_rw = rewrite_text(content)
+
             try:
+                title_rw = rewrite_text(title)
+                content_rw = rewrite_text(content)
+
                 insert_news(title_rw, content_rw, link, image_url)
+
                 all_news.append({
                     "title": title_rw,
                     "content": content_rw,
                     "link": link,
                     "image_url": image_url
                 })
-                print(f"✅ 改写成功并保存: {title_rw[:30]}...")
+
+                print(f"✅ 成功: {title_rw[:30]}... (link={link})")
+
             except Exception as e:
-                print(f"插入失败: {e}")
+                print(f"❌ 插入失败: {title[:30]}... 错误: {e}")
+
+    print(f"\n📊 本次共成功保存 {len(all_news)} 条新闻")
+    return all_news
+
