@@ -238,8 +238,8 @@ def fetch_news():
 
             try:
                 title_rw = rewrite_text(title)
-                title_rw = remove_comma_after_punct(title_rw)
                 content_rw = rewrite_text(content)
+                content_rw = remove_comma_after_punct(content)
 
                 insert_news(title_rw, content_rw, link, image_url)
 
