@@ -1,5 +1,6 @@
 import psycopg2
 import os
+import sqlite3
 
 DB_URL = os.getenv("DATABASE_URL")
 
