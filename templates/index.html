@@ -103,7 +103,14 @@ async function loadNews() {
 
             const date = document.createElement("div");
             date.className = "news-date";
-            date.textContent = item.created_at;
+
+            // 处理时间格式，只保留到分钟
+            let formattedDate = item.created_at;
+            if (formattedDate.includes(".")) {
+                formattedDate = formattedDate.split(".")[0]; // 去掉毫秒
+            }
+            formattedDate = formattedDate.slice(0, 16); // "YYYY-MM-DD HH:MM"
+            date.textContent = formattedDate;
 
             div.appendChild(title);
             div.appendChild(date);
