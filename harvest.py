@@ -238,8 +238,12 @@ def fetch_news():
 
             try:
                 title_rw = rewrite_text(title)
+                if not title_rw:
+                    print(f"改不了 : {link}")
+                    continue
                 content_rw = rewrite_text(content)
                 title_rw = remove_comma_after_punct(title_rw)
+                content_rw = remove_comma_after_punct(content_rw)
 
                 insert_news(title_rw, content_rw, link, image_url)
 
