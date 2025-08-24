@@ -55,13 +55,10 @@ async def news_detail(request: Request, news_id: int):
             })
     return HTMLResponse(content="新闻不存在", status_code=404)
 
-# --------------------------
-# JSON API
-# --------------------------
 @app.get("/api/news", response_class=JSONResponse)
-async def api_news():
-    return {"news": get_all_news()}
-
+async def api_news(skip: int = 0, limit: int = 20):
+    news = get_all_news(skip=skip, limit=limit)
+    return {"news": news}
 # --------------------------
 # 测试数据库连接
 # --------------------------
