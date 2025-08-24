@@ -18,7 +18,7 @@ async def startup_event():
     init_db()  # 初始化数据库表
     asyncio.create_task(periodic_fetch_news(1800))  # 每 30 分钟抓一次新闻
 
-async def periodic_fetch_news(interval=1800):
+async def periodic_fetch_news(interval=43200):
     while True:
         try:
             print(f"⏳ [{datetime.now()}] 开始抓新闻...")
