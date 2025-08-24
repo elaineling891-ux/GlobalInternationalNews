@@ -205,7 +205,7 @@ def fetch_news():
     all_news = []
     sites = [
         "https://udn.com/news/index",
-        ""https://news.ltn.com.tw/list/breakingnews",
+        "https://news.ltn.com.tw/list/breakingnews",
         "https://tw.news.yahoo.com/"
     ]
 
