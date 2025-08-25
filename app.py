@@ -7,6 +7,7 @@ from db import get_all_news, init_db,get_news_by_id
 from harvest import fetch_news
 from datetime import datetime
 import requests
+import time
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
@@ -98,14 +99,30 @@ async def privacy(request: Request):
 async def ads_txt():
     return "google.com, pub-2460023182833054, DIRECT, f08c47fec0942fa0"
 
-async def keep_alive_task(url, interval=300):
+KEEP_ALIVE_URLS = [
+    "https://globalnews-5ose.onrender.com/",
+    "https://globalnews-5ose.onrender.com/news"
+]
+
+async def periodic_keep_alive(interval=300, retry_delay=60):
+    """异步后台 keep-alive 任务"""
     while True:
-        try:
-            r = requests.get(url, timeout=10)
-            print(f"[keep-alive] {r.status_code}")
-        except Exception as e:
-            print("[keep-alive] 请求失败:", e)
-        await asyncio.sleep(interval)
+        for url in KEEP_ALIVE_URLS:
+            success = False
+            attempts = 0
+            while not success:
+                try:
+                    attempts += 1
+                    # 用 run_in_executor 保持非阻塞
+                    await asyncio.get_event_loop().run_in_executor(
+                        None, lambda: requests.get(url, timeout=60)
+                    )
+                    print(f"[{datetime.now()}] keep-alive 成功: {url}")
+                    success = True
+                except Exception as e:
+                    print(f"[{datetime.now()}] keep-alive 失败 (尝试 {attempts}): {url} 错误: {e}")
+                    await asyncio.sleep(retry_delay)  # 失败重试等待 1 分钟
+        await asyncio.sleep(interval)  # 主循环间隔，默认 5 分钟
 
 # --------------------------
 # Uvicorn 入口
