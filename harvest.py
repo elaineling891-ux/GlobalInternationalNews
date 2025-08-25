@@ -242,8 +242,8 @@ def fetch_news():
 
             try:
                 title_rw = rewrite_text(title)
-                if not title_rw:
-                    print(f"改不了 : {link}")
+               if not title_rw or title_rw.strip() == "":
+                    print(f"❌ 改写后仍然没有标题，跳过 (link={link})")
                     continue
                 content_rw = rewrite_text(content)
                 title_rw = remove_comma_after_punct(title_rw)
