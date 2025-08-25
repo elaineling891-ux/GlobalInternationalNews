@@ -6,6 +6,7 @@ from fastapi.templating import Jinja2Templates
 from db import get_all_news, init_db,get_news_by_id
 from harvest import fetch_news
 from datetime import datetime
+import requests
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
@@ -17,6 +18,7 @@ templates = Jinja2Templates(directory="templates")
 async def startup_event():
     init_db()  # 初始化数据库表
     asyncio.create_task(periodic_fetch_news(43200))  # 每 30 分钟抓一次新闻
+    asyncio.create_task(keep_alive_task("https://your-app.onrender.com/"))
 
 async def periodic_fetch_news(interval=43200):
     while True:
@@ -95,6 +97,15 @@ async def privacy(request: Request):
 @app.get("/ads.txt", response_class=PlainTextResponse)
 async def ads_txt():
     return "google.com, pub-2460023182833054, DIRECT, f08c47fec0942fa0"
+
+async def keep_alive_task(url, interval=300):
+    while True:
+        try:
+            r = requests.get(url, timeout=10)
+            print(f"[keep-alive] {r.status_code}")
+        except Exception as e:
+            print("[keep-alive] 请求失败:", e)
+        await asyncio.sleep(interval)
 
 # --------------------------
 # Uvicorn 入口
