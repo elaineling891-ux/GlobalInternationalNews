@@ -244,6 +244,7 @@ def fetch_news():
                     continue
                 content_rw = rewrite_text(content)
                 title_rw = remove_comma_after_punct(title_rw)
+                title_rw = dedup_sentences(title_rw)
                 content_rw = remove_comma_after_punct(content_rw)
 
                 insert_news(title_rw, content_rw, link, image_url)
@@ -267,4 +268,24 @@ def remove_comma_after_punct(title: str) -> str:
     # 替换句号、感叹号、问号后面紧跟的中英文逗号
     title = re.sub(r'([。！？])[,，]+', r'\1', title)
     return title
+
+def dedup_sentences(text: str) -> str:
+    # 按 "。！？" 分句，同时保留标点
+    parts = re.split(r'([。！？])', text)
+    sentences = []
+    result = []
+
+    # 组合成完整句子（句子+标点）
+    for i in range(0, len(parts)-1, 2):
+        sentence = parts[i].strip()
+        punct = parts[i+1]
+        full_sentence = sentence + punct
+        sentences.append(full_sentence)
+
+    # 去掉相邻重复的句子
+    for s in sentences:
+        if not result or result[-1] != s:
+            result.append(s)
+
+    return "".join(result)
 
