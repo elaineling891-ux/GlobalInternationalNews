@@ -26,6 +26,9 @@ def init_db():
 
 
 def insert_news(title, content, link=None, image_url=None):
+    if not title or not content:
+        print("⚠️ 跳过插入：title 或 content 为空")
+        return
     conn = psycopg2.connect(DB_URL)
     cur = conn.cursor()
     cur.execute("""
