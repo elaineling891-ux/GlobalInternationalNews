@@ -280,14 +280,20 @@ def dedup_sentences(text: str) -> str:
         sentences.append(full_sentence)
 
     result = []
-    i = 0
-    while i < len(sentences):
-        # 如果后面还有同样的两句、三句，直接跳过
-        dup_len = 1
-        while i+dup_len < len(sentences) and sentences[i:i+dup_len] == sentences[i+dup_len:i+dup_len*2]:
-            dup_len *= 2  # 支持多次连续重复
-        result.extend(sentences[i:i+dup_len])
-        i += dup_len
+    for s in sentences:
+        if not result:
+            result.append(s)
+        else:
+            prev = result[-1]
+            # 1. 完全相同，跳过
+            if prev == s:
+                continue
+            # 2. 如果当前句是前一句的尾部重复，也跳过
+            elif prev.endswith(s):
+                continue
+            else:
+                result.append(s)
 
     return "".join(result)
+
 
