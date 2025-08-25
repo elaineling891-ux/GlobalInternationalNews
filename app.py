@@ -100,8 +100,7 @@ async def ads_txt():
     return "google.com, pub-2460023182833054, DIRECT, f08c47fec0942fa0"
 
 KEEP_ALIVE_URLS = [
-    "https://globalnews-5ose.onrender.com/",
-    "https://globalnews-5ose.onrender.com/news"
+    "https://globalnews-5ose.onrender.com/"
 ]
 
 async def periodic_keep_alive(interval=300, retry_delay=60):
