@@ -270,22 +270,24 @@ def remove_comma_after_punct(title: str) -> str:
     return title
 
 def dedup_sentences(text: str) -> str:
-    # 按 "。！？" 分句，同时保留标点
+    # 分句，保留标点
     parts = re.split(r'([。！？])', text)
     sentences = []
-    result = []
-
-    # 组合成完整句子（句子+标点）
     for i in range(0, len(parts)-1, 2):
         sentence = parts[i].strip()
         punct = parts[i+1]
         full_sentence = sentence + punct
         sentences.append(full_sentence)
 
-    # 去掉相邻重复的句子
-    for s in sentences:
-        if not result or result[-1] != s:
-            result.append(s)
+    result = []
+    i = 0
+    while i < len(sentences):
+        # 如果后面还有同样的两句、三句，直接跳过
+        dup_len = 1
+        while i+dup_len < len(sentences) and sentences[i:i+dup_len] == sentences[i+dup_len:i+dup_len*2]:
+            dup_len *= 2  # 支持多次连续重复
+        result.extend(sentences[i:i+dup_len])
+        i += dup_len
 
     return "".join(result)
 
