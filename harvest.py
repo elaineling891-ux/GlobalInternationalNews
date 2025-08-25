@@ -229,6 +229,9 @@ def fetch_news():
             if news_exists(link):
                 print(f"⏩ 已存在: {link}")
                 continue
+            if not title or title.strip() == "":
+                print(f"❌ 跳过：空标题 (link={link})")
+                continue
 
             content = fetch_article_content(link)
             if not content:
