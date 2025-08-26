@@ -9,7 +9,7 @@ import re
 # --------------------------
 # 初始化 Cohere 改写 API
 # --------------------------
-COHERE_API_KEY = "oXTZRTThq8IM67IDdtpCeTCKsUCOCUHdaczi7zqO"
+COHERE_API_KEY = "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"
 COHERE_URL = "https://api.cohere.ai/v1/chat"
 
 def rewrite_text_chatgpt(text: str):
