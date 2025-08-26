@@ -7,3 +7,5 @@ jinja2
 aiofiles
 deep-translator
 cohere
+mysql-connector-python==8.1.1
+python-dotenv==1.1.1
