@@ -12,27 +12,44 @@ import re
 COHERE_API_KEY = "oXTZRTThq8IM67IDdtpCeTCKsUCOCUHdaczi7zqO"
 COHERE_URL = "https://api.cohere.ai/v1/chat"
 
-def rewrite_text_cohere(text: str):
-    headers = {
-        "Authorization": f"Bearer {COHERE_API_KEY}",
-        "Content-Type": "application/json"
-    }
-    payload = {
-        "model": "command-r",
-        "message": f"请用中文改写以下文本，保持原意但用不同的措辞：\n\n{text}",
-        "temperature": 0.7
-    }
+def rewrite_text_chatgpt(text: str):
+    """
+    改写文本，自动处理长文本分段，失败自动重试
+    """
+    chunks = [text[i:i+MAX_TOKENS_PER_REQUEST] for i in range(0, len(text), MAX_TOKENS_PER_REQUEST)]
+    rewritten = ""
 
-    resp = requests.post(COHERE_URL, headers=headers, json=payload)
-    if resp.status_code != 200:
-        print("Cohere 改写失败:", resp.status_code, resp.text)
-        return False, text  # ❌ 标记失败
-
-    data = resp.json()
-    try:
-        return True, data["text"]  # ✅ 成功
-    except KeyError:
-        return False, text
+    for chunk in chunks:
+        for attempt in range(3):  # 最多重试 3 次
+            try:
+                url = "https://api.openai.com/v1/chat/completions"
+                headers = {
+                    "Authorization": f"Bearer {OPENAI_API_KEY}",
+                    "Content-Type": "application/json"
+                }
+                payload = {
+                    "model": "gpt-3.5-turbo",
+                    "messages": [
+                        {"role": "system", "content": "你是中文写作助手。"},
+                        {"role": "user", "content": f"请用中文改写以下文本，保持原意但用不同措辞：\n\n{chunk}"}
+                    ],
+                    "temperature": 0.7
+                }
+                resp = requests.post(url, headers=headers, json=payload, timeout=20)
+                if resp.status_code != 200:
+                    print(f"ChatGPT 请求失败 {resp.status_code}，重试 {attempt+1}/3")
+                    time.sleep(2)
+                    continue
+                data = resp.json()
+                rewritten += data["choices"][0]["message"]["content"].strip() + "\n"
+                break
+            except Exception as e:
+                print(f"异常 {e}，重试 {attempt+1}/3")
+                time.sleep(2)
+        else:
+            print("⚠️ 改写失败，保留原文本")
+            rewritten += chunk + "\n"
+    return rewritten.strip()
 
 # --------------------------
 # 后处理：添加换行，每3句换一次行
