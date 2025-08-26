@@ -12,13 +12,13 @@ import re
 COHERE_API_KEY = "oXTZRTThq8IM67IDdtpCeTCKsUCOCUHdaczi7zqO"
 COHERE_URL = "https://api.cohere.ai/v1/chat"
 
-def rewrite_text_cohere(text: str) -> str:
+def rewrite_text_cohere(text: str):
     headers = {
         "Authorization": f"Bearer {COHERE_API_KEY}",
         "Content-Type": "application/json"
     }
     payload = {
-        "model": "command-r",  # ✅ 最新模型
+        "model": "command-r",
         "message": f"请用中文改写以下文本，保持原意但用不同的措辞：\n\n{text}",
         "temperature": 0.7
     }
@@ -26,13 +26,13 @@ def rewrite_text_cohere(text: str) -> str:
     resp = requests.post(COHERE_URL, headers=headers, json=payload)
     if resp.status_code != 200:
         print("Cohere 改写失败:", resp.status_code, resp.text)
-        return text
+        return False, text  # ❌ 标记失败
 
     data = resp.json()
     try:
-        return data["text"]  # chat 接口会直接给一个 text 字段
+        return True, data["text"]  # ✅ 成功
     except KeyError:
-        return text
+        return False, text
 
 # --------------------------
 # 后处理：添加换行，每3句换一次行
@@ -56,11 +56,15 @@ def translate_to_simplified(text: str) -> str:
         return text
 
 def rewrite_text(text):
-    rewritten = rewrite_text_cohere(text)
+    ok, rewritten = rewrite_text_cohere(text)
+    if not ok:  # ❌ Cohere 失败
+        return None
+
     rewritten = add_linebreaks(rewritten)
-    rewritten = translate_to_simplified(rewritten)  # ✅ 最后翻译成简体
+    rewritten = translate_to_simplified(rewritten)
     time.sleep(61)  # ✅ 每次调用后强制等待 61 秒
     return rewritten
+
 
 # --------------------------
 # 以下抓取文章内容、图片、网站新闻等保持不变
@@ -234,9 +238,6 @@ def fetch_news():
             if not title or title.strip() == "":
                 print(f"❌ 跳过：空标题 (link={link})")
                 continue
-            if not title or not title.strip():
-                print(f"❌ 原始没有标题，跳过 (link={link})")
-                continue
 
             content = fetch_article_content(link)
             if not content:
@@ -246,15 +247,24 @@ def fetch_news():
             image_url = fetch_article_image(link)
 
             try:
+                # ---------- 改写标题 ----------
                 title_rw = rewrite_text(title)
                 if not title_rw or title_rw.strip() == "":
-                    print(f"❌ 改写后仍然没有标题，跳过 (link={link})")
+                    print(f"❌ 改写标题失败，跳过 (link={link})")
                     continue
+
+                # ---------- 改写正文 ----------
                 content_rw = rewrite_text(content)
+                if not content_rw or content_rw.strip() == "":
+                    print(f"❌ 改写正文失败，跳过 (link={link})")
+                    continue
+
+                # ---------- 后处理 ----------
                 title_rw = remove_comma_after_punct(title_rw)
                 title_rw = dedup_sentences(title_rw)
                 content_rw = remove_comma_after_punct(content_rw)
 
+                # ---------- 入库 ----------
                 insert_news(title_rw, content_rw, link, image_url)
 
                 all_news.append({
