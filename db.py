@@ -10,7 +10,7 @@ def get_conn():
     if not m:
         raise ValueError("DATABASE_URL 格式错误")
     user, password, host, port, database = m.groups()
-    return mysql.connector.connect(
+    conn = mysql.connector.connect(
         user=user,
         password=password,
         host=host,
@@ -19,11 +19,15 @@ def get_conn():
         auth_plugin='mysql_native_password',
         charset='utf8mb4'
     )
+    # 设置时区为新加坡
+    cursor = conn.cursor()
+    cursor.execute("SET time_zone = '+08:00';")
+    cursor.close()
+    return conn
 
 def init_db():
     conn = get_conn()
     cur = conn.cursor()
-    # 建表，TEXT/BLOB 列改成 VARCHAR，确保可以建唯一索引
     cur.execute("""
     CREATE TABLE IF NOT EXISTS news (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -39,7 +43,7 @@ def init_db():
     conn.commit()
     cur.close()
     conn.close()
-    print("✅ 数据库初始化完成（created_at 默认 UTC，可在查询时转换为 SGT）")
+    print("✅ 数据库初始化完成（created_at 默认 SGT）")
 
 def insert_news(title, content, link=None, image_url=None):
     if not title or not content:
@@ -60,8 +64,7 @@ def get_all_news(skip=0, limit=20):
     conn = get_conn()
     cur = conn.cursor()
     cur.execute("""
-        SELECT id, title, content, link, image_url,
-               CONVERT_TZ(created_at, '+00:00', '+08:00') AS created_at_sgt
+        SELECT id, title, content, link, image_url, created_at
         FROM news
         ORDER BY created_at DESC
         LIMIT %s OFFSET %s
@@ -85,8 +88,7 @@ def get_news_by_id(news_id: int):
     conn = get_conn()
     cur = conn.cursor()
     cur.execute("""
-        SELECT id, title, content, link, image_url,
-               CONVERT_TZ(created_at, '+00:00', '+08:00') AS created_at_sgt
+        SELECT id, title, content, link, image_url, created_at
         FROM news
         WHERE id=%s
         LIMIT 1
