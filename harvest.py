@@ -263,6 +263,7 @@ def fetch_news():
                 title_rw = remove_comma_after_punct(title_rw)
                 title_rw = dedup_sentences(title_rw)
                 content_rw = remove_comma_after_punct(content_rw)
+                content_rw = dedup_sentences(content_rw)
 
                 # ---------- 入库 ----------
                 insert_news(title_rw, content_rw, link, image_url)
