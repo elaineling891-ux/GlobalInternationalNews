@@ -2,7 +2,7 @@ import mysql.connector
 import os
 import re
 
-DB_URL = os.getenv("DATABASE_URL")  # 格式: mysql://user:password@host:port/dbname
+DB_URL = os.getenv("DATABASE_URL")  # 格式: mysql://user:password@host:port/database
 
 def get_conn():
     pattern = r'mysql://(.*?):(.*?)@(.*?):(\d+)/(.*)'
@@ -22,13 +22,13 @@ def get_conn():
 def init_db():
     conn = get_conn()
     cur = conn.cursor()
-    # 创建表，并用 TIMESTAMP 默认 UTC，再用插入/查询时转换为 SGT
+    # 建表，TEXT/BLOB 列改成 VARCHAR，确保可以建唯一索引
     cur.execute("""
     CREATE TABLE IF NOT EXISTS news (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        title TEXT NOT NULL,
+        title VARCHAR(500) NOT NULL,
         content TEXT,
-        link TEXT UNIQUE,
+        link VARCHAR(500) UNIQUE,
         image_url TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         UNIQUE KEY unique_title (title)
@@ -57,7 +57,6 @@ def insert_news(title, content, link=None, image_url=None):
 def get_all_news(skip=0, limit=20):
     conn = get_conn()
     cur = conn.cursor()
-    # 查询时把 created_at 转为新加坡时间
     cur.execute("""
         SELECT id, title, content, link, image_url,
                CONVERT_TZ(created_at, '+00:00', '+08:00') AS created_at_sgt
@@ -76,7 +75,7 @@ def get_all_news(skip=0, limit=20):
             "content": row[2],
             "link": row[3],
             "image_url": row[4],
-            "created_at": row[5],  # 已经是 SGT
+            "created_at": row[5],  # 已是 SGT
         })
     return news
 
@@ -101,7 +100,7 @@ def get_news_by_id(news_id: int):
         "content": row[2],
         "link": row[3],
         "image_url": row[4],
-        "created_at": row[5],  # 已是 SGT
+        "created_at": row[5],
     }
 
 def news_exists(link: str) -> bool:
