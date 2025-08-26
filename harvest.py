@@ -9,7 +9,7 @@ import re
 # --------------------------
 # 初始化 Cohere 改写 API
 # --------------------------
-COHERE_API_KEY = "xanqQeQLwh6sy7FIl8MCm9BYxWF4EmajUSwccp5r"
+COHERE_API_KEY = "oXTZRTThq8IM67IDdtpCeTCKsUCOCUHdaczi7zqO"
 COHERE_URL = "https://api.cohere.ai/v1/chat"
 
 def rewrite_text_cohere(text: str) -> str:
