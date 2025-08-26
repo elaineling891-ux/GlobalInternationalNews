@@ -73,7 +73,7 @@ def translate_to_simplified(text: str) -> str:
         return text
 
 def rewrite_text(text):
-    ok, rewritten = rewrite_text_cohere(text)
+    ok, rewritten = rewrite_text_chatgpt(text)
     if not ok:  # ❌ Cohere 失败
         return None
 
