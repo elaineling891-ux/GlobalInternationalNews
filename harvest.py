@@ -58,7 +58,9 @@ def translate_to_simplified(text: str) -> str:
 def rewrite_text(text):
     rewritten = rewrite_text_cohere(text)
     rewritten = add_linebreaks(rewritten)
-    return translate_to_simplified(rewritten)  # ✅ 最后翻译成简体
+    rewritten = translate_to_simplified(rewritten)  # ✅ 最后翻译成简体
+    time.sleep(61)  # ✅ 每次调用后强制等待 61 秒
+    return rewritten
 
 # --------------------------
 # 以下抓取文章内容、图片、网站新闻等保持不变
