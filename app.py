@@ -123,6 +123,29 @@ async def periodic_keep_alive(interval=300, retry_delay=60):
                     await asyncio.sleep(retry_delay)  # 失败重试等待 1 分钟
         await asyncio.sleep(interval)  # 主循环间隔，默认 5 分钟
 
+@app.get("/admin", response_class=HTMLResponse)
+async def admin_get(request: Request):
+    return templates.TemplateResponse("admin.html", {"request": request})
+
+@app.post("/admin", response_class=HTMLResponse)
+async def admin_post(
+    request: Request,
+    title: str = Form(...),
+    content: str = Form(...),
+    link: str = Form(None),
+    image_url: str = Form(None)
+):
+    try:
+        insert_news(title, content, link, image_url)
+        message = "✅ 新闻已插入数据库"
+    except Exception as e:
+        message = f"⚠️ 插入失败: {e}"
+
+    return templates.TemplateResponse("admin.html", {
+        "request": request,
+        "message": message
+    })
+
 # --------------------------
 # Uvicorn 入口
 # --------------------------
