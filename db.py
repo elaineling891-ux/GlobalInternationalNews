@@ -16,7 +16,8 @@ def get_conn():
         host=host,
         port=int(port),
         database=database,
-        auth_plugin='mysql_native_password'
+        auth_plugin='mysql_native_password',
+        charset='utf8mb4'
     )
 
 def init_db():
@@ -24,15 +25,14 @@ def init_db():
     cur = conn.cursor()
     # 建表，TEXT/BLOB 列改成 VARCHAR，确保可以建唯一索引
     cur.execute("""
-    CREATE TABLE IF NOT EXISTS news (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        title VARCHAR(500) NOT NULL,
-        content TEXT,
-        link VARCHAR(500) UNIQUE,
-        image_url TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE KEY unique_title (title)
-    )
+    CREATE TABLE news (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(500) NOT NULL,
+    content TEXT,
+    link VARCHAR(500) UNIQUE,
+    image_url TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
     """)
     conn.commit()
     cur.close()
