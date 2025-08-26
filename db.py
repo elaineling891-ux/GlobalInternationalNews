@@ -1,51 +1,66 @@
-import psycopg2
+import mysql.connector
 import os
+import re
 
-DB_URL = os.getenv("DATABASE_URL")
+DB_URL = os.getenv("DATABASE_URL")  # 格式: mysql://user:password@host:port/dbname
 
+def get_conn():
+    pattern = r'mysql://(.*?):(.*?)@(.*?):(\d+)/(.*)'
+    m = re.match(pattern, DB_URL)
+    if not m:
+        raise ValueError("DATABASE_URL 格式错误")
+    user, password, host, port, database = m.groups()
+    return mysql.connector.connect(
+        user=user,
+        password=password,
+        host=host,
+        port=int(port),
+        database=database,
+        auth_plugin='mysql_native_password'
+    )
 
 def init_db():
-    conn = psycopg2.connect(DB_URL)
+    conn = get_conn()
     cur = conn.cursor()
+    # 创建表，并用 TIMESTAMP 默认 UTC，再用插入/查询时转换为 SGT
     cur.execute("""
     CREATE TABLE IF NOT EXISTS news (
-        id SERIAL PRIMARY KEY,
+        id INT AUTO_INCREMENT PRIMARY KEY,
         title TEXT NOT NULL,
         content TEXT,
         link TEXT UNIQUE,
         image_url TEXT,
-        -- 存本地时间（新加坡），无时区
-        created_at TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'Asia/Singapore'),
-        UNIQUE(title)
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY unique_title (title)
     )
     """)
     conn.commit()
     cur.close()
     conn.close()
-    print("✅ 数据库初始化完成（created_at=SGT）")
-
+    print("✅ 数据库初始化完成（created_at 默认 UTC，可在查询时转换为 SGT）")
 
 def insert_news(title, content, link=None, image_url=None):
     if not title or not content:
         print("⚠️ 跳过插入：title 或 content 为空")
         return
-    conn = psycopg2.connect(DB_URL)
+    conn = get_conn()
     cur = conn.cursor()
     cur.execute("""
         INSERT INTO news (title, content, link, image_url)
         VALUES (%s, %s, %s, %s)
-        ON CONFLICT (link) DO NOTHING
+        ON DUPLICATE KEY UPDATE link=link
     """, (title, content, link, image_url))
     conn.commit()
     cur.close()
     conn.close()
 
-
 def get_all_news(skip=0, limit=20):
-    conn = psycopg2.connect(DB_URL)
+    conn = get_conn()
     cur = conn.cursor()
+    # 查询时把 created_at 转为新加坡时间
     cur.execute("""
-        SELECT id, title, content, link, image_url, created_at
+        SELECT id, title, content, link, image_url,
+               CONVERT_TZ(created_at, '+00:00', '+08:00') AS created_at_sgt
         FROM news
         ORDER BY created_at DESC
         LIMIT %s OFFSET %s
@@ -53,7 +68,6 @@ def get_all_news(skip=0, limit=20):
     rows = cur.fetchall()
     cur.close()
     conn.close()
-
     news = []
     for row in rows:
         news.append({
@@ -62,15 +76,16 @@ def get_all_news(skip=0, limit=20):
             "content": row[2],
             "link": row[3],
             "image_url": row[4],
-            "created_at": row[5],
+            "created_at": row[5],  # 已经是 SGT
         })
     return news
 
 def get_news_by_id(news_id: int):
-    conn = psycopg2.connect(DB_URL)
+    conn = get_conn()
     cur = conn.cursor()
     cur.execute("""
-        SELECT id, title, content, link, image_url, created_at
+        SELECT id, title, content, link, image_url,
+               CONVERT_TZ(created_at, '+00:00', '+08:00') AS created_at_sgt
         FROM news
         WHERE id=%s
         LIMIT 1
@@ -86,15 +101,13 @@ def get_news_by_id(news_id: int):
         "content": row[2],
         "link": row[3],
         "image_url": row[4],
-        "created_at": row[5],
+        "created_at": row[5],  # 已是 SGT
     }
 
-
 def news_exists(link: str) -> bool:
-    """检查数据库里是否已经有这个链接"""
     if not link:
         return False
-    conn = psycopg2.connect(DB_URL)
+    conn = get_conn()
     cur = conn.cursor()
     cur.execute("SELECT 1 FROM news WHERE link=%s LIMIT 1", (link,))
     exists = cur.fetchone() is not None
