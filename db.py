@@ -25,14 +25,16 @@ def init_db():
     cur = conn.cursor()
     # 建表，TEXT/BLOB 列改成 VARCHAR，确保可以建唯一索引
     cur.execute("""
-    CREATE TABLE news (
+   CREATE TABLE news (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(500) NOT NULL,
     content TEXT,
-    link VARCHAR(500) UNIQUE,
+    link VARCHAR(500),
     image_url TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_link (link(191)),
+    UNIQUE KEY unique_title (title(191))
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
     """)
     conn.commit()
     cur.close()
