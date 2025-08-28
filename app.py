@@ -98,6 +98,14 @@ async def privacy(request: Request):
 async def ads_txt():
     return "google.com, pub-2460023182833054, DIRECT, f08c47fec0942fa0"
 
+@app.get("/terms", response_class=HTMLResponse)
+async def terms(request: Request):
+    return templates.TemplateResponse("terms.html", {"request": request, "year": datetime.now().year})
+
+@app.get("/disclaimer", response_class=HTMLResponse)
+async def disclaimer(request: Request):
+    return templates.TemplateResponse("disclaimer.html", {"request": request, "year": datetime.now().year})
+
 KEEP_ALIVE_URLS = [
     "https://globalnews-5ose.onrender.com/"
 ]
