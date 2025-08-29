@@ -108,7 +108,7 @@ async def disclaimer(request: Request):
 
 KEEP_ALIVE_URLS = [
     "https://globalinternationalnews.onrender.com/",
-    "https://www.mychinese.news.my"
+    "https://www.mychinesenews.my"
 ]
 
 async def periodic_keep_alive(interval=300, retry_delay=60):
