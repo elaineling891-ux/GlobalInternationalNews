@@ -107,7 +107,8 @@ async def disclaimer(request: Request):
     return templates.TemplateResponse("disclaimer.html", {"request": request, "year": datetime.now().year})
 
 KEEP_ALIVE_URLS = [
-    "https://globalnews-5ose.onrender.com/"
+    "https://globalinternationalnews.onrender.com/",
+    "https://www.mychinese.news.my"
 ]
 
 async def periodic_keep_alive(interval=300, retry_delay=60):
