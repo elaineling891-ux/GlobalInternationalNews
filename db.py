@@ -117,3 +117,21 @@ def news_exists(link: str) -> bool:
     cur.close()
     conn.close()
     return exists
+
+def update_news(news_id, title, content, link=None, image_url=None):
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+    c.execute("""
+        UPDATE news
+        SET title=?, content=?, link=?, image_url=?
+        WHERE id=?
+    """, (title, content, link, image_url, news_id))
+    conn.commit()
+    conn.close()
+
+def delete_news(news_id):
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+    c.execute("DELETE FROM news WHERE id=?", (news_id,))
+    conn.commit()
+    conn.close()
