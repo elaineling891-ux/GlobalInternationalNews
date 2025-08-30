@@ -106,6 +106,17 @@ def get_news_by_id(news_id: int):
         "image_url": row[4],
         "created_at": row[5],
     }
+
+def news_exists(link: str) -> bool:
+    if not link:
+        return False
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute("SELECT 1 FROM news WHERE link=%s LIMIT 1", (link,))
+    exists = cur.fetchone() is not None
+    cur.close()
+    conn.close()
+    return exists
     
 def update_news(news_id, title, content, link=None, image_url=None):
     conn = get_conn()
