@@ -1,36 +1,37 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <title>新闻维护</title>
+  <meta charset="UTF-8">
+  <title>Maintenance</title>
 </head>
 <body>
-    <h1>新闻维护页面</h1>
-
-    <table border="1">
-        <tr>
-            <th>ID</th>
-            <th>标题</th>
-            <th>内容</th>
-            <th>操作</th>
-        </tr>
-        {% for item in news %}
-        <tr>
-            <td>{{ item[0] }}</td>
-            <td>{{ item[1] }}</td>
-            <td>{{ item[2] }}</td>
-            <td>
-                <form action="/maintenance/delete/{{ item[0] }}" method="post">
-                    <button type="submit">删除</button>
-                </form>
-                <form action="/maintenance/update/{{ item[0] }}" method="post">
-                    <input type="text" name="title" value="{{ item[1] }}">
-                    <input type="text" name="content" value="{{ item[2] }}">
-                    <button type="submit">更新</button>
-                </form>
-            </td>
-        </tr>
+  <h1>Database Maintenance</h1>
+  <table border="1" cellpadding="5">
+    <thead>
+      <tr>
+        {% for col in columns %}
+        <th>{{ col }}</th>
         {% endfor %}
-    </table>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        {% for item in row %}
+        <td>{{ item }}</td>
+        {% endfor %}
+        <td>
+          <form action="/update/{{ row[0] }}" method="post" style="display:inline;">
+            <button type="submit">Update</button>
+          </form>
+          <form action="/delete/{{ row[0] }}" method="post" style="display:inline;">
+            <button type="submit">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </body>
 </html>
