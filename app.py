@@ -135,6 +135,20 @@ async def periodic_keep_alive(interval=300, retry_delay=60):
 async def admin_get(request: Request):
     return templates.TemplateResponse("admin.html", {"request": request})
 
+@app.post("/admin")
+def add_news(
+    request: Request,
+    title: str = Form(...),
+    content: str = Form(...),
+    link: str = Form(None),
+    image_url: str = Form(None),
+):
+    insert_news(title, content, link, image_url)
+    return templates.TemplateResponse(
+        "maintenance.html",
+        {"request": request, "message": "✅ 新闻已成功提交！"}
+    )
+
 @app.get("/maintenance", response_class=HTMLResponse)
 async def maintenance(request: Request):
     columns, rows = get_all_db()
