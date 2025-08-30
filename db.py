@@ -106,43 +106,35 @@ def get_news_by_id(news_id: int):
         "image_url": row[4],
         "created_at": row[5],
     }
-
-def news_exists(link: str) -> bool:
-    if not link:
-        return False
+    
+def update_news(news_id, title, content, link=None, image_url=None):
     conn = get_conn()
     cur = conn.cursor()
-    cur.execute("SELECT 1 FROM news WHERE link=%s LIMIT 1", (link,))
-    exists = cur.fetchone() is not None
-    cur.close()
-    conn.close()
-    return exists
-
-def update_news(news_id, title, content, link=None, image_url=None):
-    conn = sqlite3.connect(DB_NAME)
-    c = conn.cursor()
-    c.execute("""
+    cur.execute("""
         UPDATE news
-        SET title=?, content=?, link=?, image_url=?
-        WHERE id=?
+        SET title=%s, content=%s, link=%s, image_url=%s
+        WHERE id=%s
     """, (title, content, link, image_url, news_id))
     conn.commit()
+    cur.close()
     conn.close()
 
 def delete_news(news_id):
-    conn = sqlite3.connect(DB_NAME)
-    c = conn.cursor()
-    c.execute("DELETE FROM news WHERE id=?", (news_id,))
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM news WHERE id=%s", (news_id,))
     conn.commit()
+    cur.close()
     conn.close()
 
 def get_all_db():
-    conn = sqlite3.connect("news.db")
-    cursor = conn.cursor()
-    cursor.execute("PRAGMA table_info(news)")
-    columns = [info[1] for info in cursor.fetchall()]
-    cursor.execute("SELECT * FROM news")
-    rows = cursor.fetchall()
+    """返回所有字段名 + 所有行数据"""
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute("DESCRIBE news")
+    columns = [col[0] for col in cur.fetchall()]
+    cur.execute("SELECT * FROM news ORDER BY created_at DESC")
+    rows = cur.fetchall()
+    cur.close()
     conn.close()
     return columns, rows
-    
