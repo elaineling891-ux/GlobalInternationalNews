@@ -1,9 +1,9 @@
 import asyncio
 import os
-from fastapi import FastAPI, Request, Form
+from fastapi import FastAPI, Request, Form, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
 from fastapi.templating import Jinja2Templates
-from db import get_all_news, init_db, get_news_by_id, insert_news
+from db import get_all_news, init_db, get_news_by_id, insert_news, update_news, delete_news
 from harvest import fetch_news
 from datetime import datetime
 import requests
@@ -151,6 +151,51 @@ async def admin_post(
 
     return templates.TemplateResponse("admin.html", {
         "request": request,
+        "message": message
+    })
+
+@app.get("/maintenance", response_class=HTMLResponse)
+async def maintenance_get(request: Request):
+    news = get_all_news()
+    return templates.TemplateResponse("maintenance.html", {
+        "request": request,
+        "news": news
+    })
+
+@app.post("/maintenance/update", response_class=HTMLResponse)
+async def maintenance_update(
+    request: Request,
+    news_id: int = Form(...),
+    title: str = Form(...),
+    content: str = Form(...),
+    link: str = Form(None),
+    image_url: str = Form(None)
+):
+    try:
+        update_news(news_id, title, content, link, image_url)
+        message = "✅ 更新成功"
+    except Exception as e:
+        message = f"⚠️ 更新失败: {e}"
+
+    news = get_all_news()
+    return templates.TemplateResponse("maintenance.html", {
+        "request": request,
+        "news": news,
+        "message": message
+    })
+
+@app.post("/maintenance/delete", response_class=HTMLResponse)
+async def maintenance_delete(request: Request, news_id: int = Form(...)):
+    try:
+        delete_news(news_id)
+        message = "🗑️ 删除成功"
+    except Exception as e:
+        message = f"⚠️ 删除失败: {e}"
+
+    news = get_all_news()
+    return templates.TemplateResponse("maintenance.html", {
+        "request": request,
+        "news": news,
         "message": message
     })
 
