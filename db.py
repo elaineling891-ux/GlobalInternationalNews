@@ -135,3 +135,14 @@ def delete_news(news_id):
     c.execute("DELETE FROM news WHERE id=?", (news_id,))
     conn.commit()
     conn.close()
+
+def get_all_db():
+    conn = sqlite3.connect("news.db")
+    cursor = conn.cursor()
+    cursor.execute("PRAGMA table_info(news)")
+    columns = [info[1] for info in cursor.fetchall()]
+    cursor.execute("SELECT * FROM news")
+    rows = cursor.fetchall()
+    conn.close()
+    return columns, rows
+    
