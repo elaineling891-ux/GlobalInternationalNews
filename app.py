@@ -3,7 +3,7 @@ import os
 from fastapi import FastAPI, Request, Form, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
 from fastapi.templating import Jinja2Templates
-from db import get_all_news, init_db, get_news_by_id, insert_news, update_news, delete_news
+from db import get_all_news, init_db, get_news_by_id, insert_news, update_news, delete_news, get_all_db
 from harvest import fetch_news
 from datetime import datetime
 import requests
