@@ -135,69 +135,31 @@ async def periodic_keep_alive(interval=300, retry_delay=60):
 async def admin_get(request: Request):
     return templates.TemplateResponse("admin.html", {"request": request})
 
-@app.post("/admin", response_class=HTMLResponse)
-async def admin_post(
-    request: Request,
-    title: str = Form(...),
-    content: str = Form(...),
-    link: str = Form(None),
-    image_url: str = Form(None)
-):
-    try:
-        insert_news(title, content, link, image_url)
-        message = "✅ 新闻已插入数据库"
-    except Exception as e:
-        message = f"⚠️ 插入失败: {e}"
-
-    return templates.TemplateResponse("admin.html", {
-        "request": request,
-        "message": message
-    })
-
 @app.get("/maintenance", response_class=HTMLResponse)
-async def maintenance_get(request: Request):
-    news = get_all_news()
-    return templates.TemplateResponse("maintenance.html", {
-        "request": request,
-        "news": news
-    })
+async def maintenance(request: Request):
+    columns, rows = get_all_db()
+    return templates.TemplateResponse(
+        "maintenance.html",
+        {"request": request, "columns": columns, "rows": rows}
+    )
 
-@app.post("/maintenance/update", response_class=HTMLResponse)
-async def maintenance_update(
-    request: Request,
-    news_id: int = Form(...),
+# 更新
+@app.post("/update/{news_id}")
+async def update(
+    news_id: int,
     title: str = Form(...),
     content: str = Form(...),
     link: str = Form(None),
     image_url: str = Form(None)
 ):
-    try:
-        update_news(news_id, title, content, link, image_url)
-        message = "✅ 更新成功"
-    except Exception as e:
-        message = f"⚠️ 更新失败: {e}"
+    update_news(news_id, title, content, link, image_url)
+    return RedirectResponse("/maintenance", status_code=303)
 
-    news = get_all_news()
-    return templates.TemplateResponse("maintenance.html", {
-        "request": request,
-        "news": news,
-        "message": message
-    })
-
-@app.post("/maintenance/delete", response_class=HTMLResponse)
-async def maintenance_delete(request: Request, news_id: int = Form(...)):
-    try:
-        delete_news(news_id)
-        message = "🗑️ 删除成功"
-    except Exception as e:
-        message = f"⚠️ 删除失败: {e}"
-
-    news = get_all_news()
-    return templates.TemplateResponse("maintenance.html", {
-        "request": request,
-        "news": news,
-        "message": message
-    })
+# 删除
+@app.post("/delete/{news_id}")
+async def delete(news_id: int):
+    delete_news(news_id)
+    return RedirectResponse("/maintenance", status_code=303)
 
 # --------------------------
 # Uvicorn 入口
