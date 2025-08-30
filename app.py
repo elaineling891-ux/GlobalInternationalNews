@@ -140,7 +140,12 @@ async def maintenance(request: Request):
     columns, rows = get_all_db()
     return templates.TemplateResponse(
         "maintenance.html",
-        {"request": request, "columns": columns, "rows": rows}
+        {
+            "request": request,
+            "columns": columns,
+            "rows": rows,
+            "zip": zip   # 👈 让 Jinja2 能用 zip
+        }
     )
 
 # 更新
