@@ -16,12 +16,12 @@
     </tr>
     {% for news in news_list %}
     <tr>
-      <td>{{ news[0] }}</td>
-      <td>{{ news[1] }}</td>
-      <td>{{ news[5] }}</td>
+      <td>{{ news.id }}</td>
+      <td>{{ news.title }}</td>
+      <td>{{ news.category }}</td>
       <td>
-        <a href="/admin/edit/{{ news[0] }}">✏️ 编辑</a> | 
-        <a href="/admin/delete/{{ news[0] }}" onclick="return confirm('确定删除吗?')">🗑 删除</a>
+        <a href="/admin/edit/{{ news.id }}">✏️ 编辑</a> | 
+        <a href="/admin/delete/{{ news.id }}" onclick="return confirm('确定删除吗?')">🗑 删除</a>
       </td>
     </tr>
     {% endfor %}
