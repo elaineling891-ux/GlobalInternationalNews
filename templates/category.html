@@ -2,11 +2,19 @@
 
 {% block content %}
 <h1>{{ category }} 新闻 - 第 {{ current_page }} 页</h1>
-<ul>
+<ul class="news-list">
     {% for news in news_list %}
-    <li>
-        <a href="/news/{{ news.id }}">{{ news.title }}</a>
-        <span class="date">{{ news.created_at.strftime('%Y-%m-%d') }}</span>
+    <li class="news-item" style="display:flex; align-items:flex-start; margin-bottom:1em;">
+        {% if news.image_url %}
+        <a href="/news/{{ news.id }}">
+            <img src="{{ news.image_url }}" alt="{{ news.title }}" style="width:120px; height:auto; margin-right:1em; object-fit:cover;">
+        </a>
+        {% endif %}
+        <div class="news-info">
+            <a href="/news/{{ news.id }}" class="news-title">{{ news.title }}</a>
+            <br>
+            <span class="date">{{ news.created_at.strftime('%Y-%m-%d') }}</span>
+        </div>
     </li>
     {% endfor %}
 </ul>
