@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>我报</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header>
+        <h1><a href="/">我报</a></h1>
+        <nav>
+            <ul>
+                <li><a href="/">首页</a></li>
+                <li><a href="/category/国内">国内</a></li>
+                <li><a href="/category/国际">国际</a></li>
+                <li><a href="/category/财经">财经</a></li>
+                <li><a href="/category/娱乐">娱乐</a></li>
+                <li><a href="/category/体育">体育</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>版权所有 © {{ year }}</p>
+    </footer>
+</body>
+</html>
