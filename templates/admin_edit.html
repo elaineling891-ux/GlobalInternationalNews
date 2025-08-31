@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>编辑新闻</title>
+</head>
+<body>
+  <h1>编辑新闻</h1>
+  <form method="post" action="/admin/update/{{ news[0] }}">
+    <p>
+      <label>标题:</label><br>
+      <input type="text" name="title" value="{{ news[1] }}" required>
+    </p>
+    <p>
+      <label>内容:</label><br>
+      <textarea name="content" rows="6" cols="60" required>{{ news[2] }}</textarea>
+    </p>
+    <p>
+      <label>来源链接:</label><br>
+      <input type="url" name="link" value="{{ news[3] }}">
+    </p>
+    <p>
+      <label>图片URL:</label><br>
+      <input type="url" name="image_url" value="{{ news[4] }}">
+    </p>
+    <p>
+      <label>分类:</label><br>
+      <input type="text" name="category" value="{{ news[5] }}">
+    </p>
+    <p>
+      <button type="submit">保存修改</button>
+      <a href="/admin">返回</a>
+    </p>
+  </form>
+</body>
+</html>
