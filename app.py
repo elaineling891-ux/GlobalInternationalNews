@@ -29,13 +29,11 @@ def startup_event():
 
 # 首页
 @app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
+async def main(request: Request):
     category_news = get_news_grouped_by_category(limit=5)
-    categories = get_all_categories()
     return templates.TemplateResponse("main.html", {
         "request": request,
         "category_news": category_news,
-        "categories": categories,
         "year": datetime.now().year
     })
 
