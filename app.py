@@ -42,16 +42,20 @@ async def home(request: Request):
 
 # 分类页
 @app.get("/category/{category}", response_class=HTMLResponse)
-async def category_page(request: Request, category: str):
-    news_list = get_news_by_category(category, limit=20)
+async def category_page(request: Request, category: str, page: int = 1, per_page: int = 20):
+    offset = (page - 1) * per_page
+    news_list = get_news_by_category(category, limit=per_page, offset=offset)
     categories = get_all_categories()
     return templates.TemplateResponse("category.html", {
         "request": request,
         "category": category,
         "news_list": news_list,
         "categories": categories,
-        "year": datetime.now().year
+        "year": datetime.now().year,
+        "current_page": page,
+        "per_page": per_page
     })
+
 
 
 # 新闻详情页
