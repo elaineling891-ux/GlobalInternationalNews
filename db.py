@@ -173,3 +173,30 @@ def fetch_news_by_id(news_id):
     if row:
         return {"id": row[0], "title": row[1], "image_url": row[2], "content": row[3]}
     return None
+
+def fetch_news_by_category(category, skip=0, limit=20):
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT id, title, content, link, image_url, category, created_at
+        FROM news
+        WHERE category=%s
+        ORDER BY created_at DESC
+        LIMIT %s OFFSET %s
+    """, (category, limit, skip))
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+
+    news = []
+    for row in rows:
+        news.append({
+            "id": row[0],
+            "title": row[1],
+            "content": row[2],
+            "link": row[3],
+            "image_url": row[4],
+            "category": row[5],
+            "created_at": row[6],
+        })
+    return news
