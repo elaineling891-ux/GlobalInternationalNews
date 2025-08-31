@@ -6,12 +6,15 @@
     <p class="date">{{ news.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
 
     {% if news.image_url %}
-        <img src="{{ news.image_url }}" alt="{{ news.title }}" style="max-width:100%;height:auto;">
+        <img src="{{ news.image_url }}" alt="{{ news.title }}" style="max-width:100%;height:auto;margin-bottom:1em;">
     {% endif %}
 
     <div class="content">
-        {% for paragraph in news.content.split('\n\n') %}
-            <p>{{ paragraph }}</p>
+        {% for paragraph in news.content.splitlines() %}
+            {% set clean_paragraph = paragraph.strip() %}
+            {% if clean_paragraph %}
+                <p>{{ clean_paragraph }}</p>
+            {% endif %}
         {% endfor %}
     </div>
 
