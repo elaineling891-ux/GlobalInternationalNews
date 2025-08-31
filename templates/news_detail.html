@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}{{ news.title }} - 我的新闻网站{% endblock %}
+
+{% block content %}
+    <h2>{{ news.title }}</h2>
+
+    {% if news.image_url %}
+        <img src="{{ news.image_url }}" alt="{{ news.title }}" class="news-image">
+    {% endif %}
+
+    <p class="news-meta">
+        分类：{{ news.category }} | 发布时间：{{ news.created_at }}
+    </p>
+
+    <div class="news-content">
+        <p>{{ news.content }}</p>
+    </div>
+
+    {% if news.link %}
+        <p><a href="{{ news.link }}" target="_blank">原文链接</a></p>
+    {% endif %}
+{% endblock %}
