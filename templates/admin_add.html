@@ -1,27 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <title>新增新闻</title>
 </head>
 <body>
   <h1>新增新闻</h1>
   <form method="post" action="/admin/add">
-    <label>标题:</label><br>
-    <input type="text" name="title" required><br><br>
-    
-    <label>内容:</label><br>
-    <textarea name="content" required></textarea><br><br>
-    
-    <label>来源链接:</label><br>
-    <input type="url" name="link"><br><br>
-    
-    <label>图片URL:</label><br>
-    <input type="url" name="image_url"><br><br>
-    
-    <label>分类:</label><br>
-    <input type="text" name="category"><br><br>
-    
-    <button type="submit">提交</button>
+    <p>
+      <label>标题:</label><br>
+      <input type="text" name="title" required>
+    </p>
+    <p>
+      <label>内容:</label><br>
+      <textarea name="content" rows="6" cols="60" required></textarea>
+    </p>
+    <p>
+      <label>来源链接:</label><br>
+      <input type="url" name="link">
+    </p>
+    <p>
+      <label>图片URL:</label><br>
+      <input type="url" name="image_url">
+    </p>
+    <p>
+      <label>分类:</label><br>
+      <input type="text" name="category">
+    </p>
+    <p>
+      <button type="submit">提交</button>
+      <a href="/admin">返回</a>
+    </p>
   </form>
 </body>
 </html>
