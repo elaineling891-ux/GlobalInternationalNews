@@ -1,13 +1,15 @@
 import asyncio
 import os
-from fastapi import FastAPI, Request, Form, HTTPException
+from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from db import get_all_news, init_db, get_news_by_id, insert_news, update_news, delete_news, get_all_db
+from db import (
+    get_all_news, init_db, get_news_by_id, insert_news,
+    update_news, delete_news, get_all_db, get_news_by_category
+)
 from harvest import fetch_news
 from datetime import datetime
 import requests
-import time
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
@@ -17,7 +19,7 @@ templates = Jinja2Templates(directory="templates")
 # --------------------------
 @app.on_event("startup")
 async def startup_event():
-    init_db()  # 初始化数据库表
+    init_db()
     asyncio.create_task(periodic_keep_alive(300))
 
 async def periodic_fetch_news(interval=43200):
@@ -31,19 +33,37 @@ async def periodic_fetch_news(interval=43200):
         await asyncio.sleep(interval)
 
 # --------------------------
-# 首页
+# 首页（main.html, 含分类）
 # --------------------------
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    news = get_all_news()  # 从数据库获取新闻
-    return templates.TemplateResponse("index.html", {
+    categories = ["要闻", "国际", "财经", "娱乐", "体育", "科技"]
+    category_news = {}
+
+    for cat in categories:
+        category_news[cat] = get_news_by_category(cat, limit=5)
+
+    return templates.TemplateResponse("main.html", {
         "request": request,
+        "category_news": category_news,
+        "year": datetime.now().year
+    })
+
+# --------------------------
+# 分类页
+# --------------------------
+@app.get("/category/{cat}", response_class=HTMLResponse)
+async def category_page(request: Request, cat: str):
+    news = get_news_by_category(cat, limit=50)
+    return templates.TemplateResponse("category.html", {
+        "request": request,
+        "category": cat,
         "news": news,
         "year": datetime.now().year
     })
 
 # --------------------------
-# 新闻详情页，根据数据库 id
+# 新闻详情页
 # --------------------------
 @app.get("/news/{news_id}", response_class=HTMLResponse)
 async def news_detail(request: Request, news_id: int):
@@ -56,13 +76,14 @@ async def news_detail(request: Request, news_id: int):
         "year": datetime.now().year
     })
 
+# --------------------------
+# API
+# --------------------------
 @app.get("/api/news", response_class=JSONResponse)
 async def api_news(skip: int = 0, limit: int = 20):
     news = get_all_news(skip=skip, limit=limit)
     return {"news": news}
-# --------------------------
-# 测试数据库连接
-# --------------------------
+
 @app.get("/check_db")
 async def check_db():
     try:
@@ -71,9 +92,6 @@ async def check_db():
     except Exception as e:
         return {"tables_exist": False, "error": str(e)}
 
-# --------------------------
-# 手动抓新闻接口
-# --------------------------
 @app.api_route("/manual_fetch", methods=["GET", "POST"])
 async def manual_fetch():
     try:
@@ -82,6 +100,9 @@ async def manual_fetch():
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
+# --------------------------
+# 页面
+# --------------------------
 @app.get("/about", response_class=HTMLResponse)
 async def about(request: Request):
     return templates.TemplateResponse("about.html", {"request": request})
@@ -94,10 +115,6 @@ async def contact(request: Request):
 async def privacy(request: Request):
     return templates.TemplateResponse("privacy.html", {"request": request})
 
-@app.get("/ads.txt", response_class=PlainTextResponse)
-async def ads_txt():
-    return "google.com, pub-2460023182833054, DIRECT, f08c47fec0942fa0"
-
 @app.get("/terms", response_class=HTMLResponse)
 async def terms(request: Request):
     return templates.TemplateResponse("terms.html", {"request": request, "year": datetime.now().year})
@@ -106,13 +123,19 @@ async def terms(request: Request):
 async def disclaimer(request: Request):
     return templates.TemplateResponse("disclaimer.html", {"request": request, "year": datetime.now().year})
 
+@app.get("/ads.txt", response_class=PlainTextResponse)
+async def ads_txt():
+    return "google.com, pub-2460023182833054, DIRECT, f08c47fec0942fa0"
+
+# --------------------------
+# keep alive
+# --------------------------
 KEEP_ALIVE_URLS = [
     "https://globalinternationalnews.onrender.com/",
     "https://www.mychinesenews.my"
 ]
 
 async def periodic_keep_alive(interval=300, retry_delay=60):
-    """异步后台 keep-alive 任务"""
     while True:
         for url in KEEP_ALIVE_URLS:
             success = False
@@ -120,7 +143,6 @@ async def periodic_keep_alive(interval=300, retry_delay=60):
             while not success:
                 try:
                     attempts += 1
-                    # 用 run_in_executor 保持非阻塞
                     await asyncio.get_event_loop().run_in_executor(
                         None, lambda: requests.get(url, timeout=60)
                     )
@@ -128,9 +150,12 @@ async def periodic_keep_alive(interval=300, retry_delay=60):
                     success = True
                 except Exception as e:
                     print(f"[{datetime.now()}] keep-alive 失败 (尝试 {attempts}): {url} 错误: {e}")
-                    await asyncio.sleep(retry_delay)  # 失败重试等待 1 分钟
-        await asyncio.sleep(interval)  # 主循环间隔，默认 5 分钟
+                    await asyncio.sleep(retry_delay)
+        await asyncio.sleep(interval)
 
+# --------------------------
+# Admin
+# --------------------------
 @app.get("/admin", response_class=HTMLResponse)
 async def admin_get(request: Request):
     return templates.TemplateResponse("admin.html", {"request": request})
@@ -142,8 +167,9 @@ def add_news(
     content: str = Form(...),
     link: str = Form(None),
     image_url: str = Form(None),
+    category: str = Form("要闻")
 ):
-    insert_news(title, content, link, image_url)
+    insert_news(title, content, link, image_url, category)
     return templates.TemplateResponse(
         "maintenance.html",
         {"request": request, "message": "✅ 新闻已成功提交！"}
@@ -154,27 +180,21 @@ async def maintenance(request: Request):
     columns, rows = get_all_db()
     return templates.TemplateResponse(
         "maintenance.html",
-        {
-            "request": request,
-            "columns": columns,
-            "rows": rows,
-            "zip": zip   # 👈 让 Jinja2 能用 zip
-        }
+        {"request": request, "columns": columns, "rows": rows, "zip": zip}
     )
 
-# 更新
 @app.post("/update/{news_id}")
 async def update(
     news_id: int,
     title: str = Form(...),
     content: str = Form(...),
     link: str = Form(None),
-    image_url: str = Form(None)
+    image_url: str = Form(None),
+    category: str = Form("要闻")
 ):
-    update_news(news_id, title, content, link, image_url)
+    update_news(news_id, title, content, link, image_url, category)
     return RedirectResponse("/maintenance", status_code=303)
 
-# 删除
 @app.post("/delete/{news_id}")
 async def delete(news_id: int):
     delete_news(news_id)
