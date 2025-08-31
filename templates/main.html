@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container">
+  {% for cat, news_list in category_news.items() %}
+    <section class="category-block">
+      <h2 class="category-title">{{ cat }}</h2>
+      <ul class="news-list">
+        {% for n in news_list %}
+          <li>
+            <a href="/news/{{ n[0] }}">{{ n[1] }}</a>
+            <span class="date">{{ n[4].strftime("%Y-%m-%d %H:%M") }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+      <a class="more-link" href="/category/{{ cat }}">更多 {{ cat }} 新闻 »</a>
+    </section>
+  {% endfor %}
+</div>
+
+{% endblock %}
