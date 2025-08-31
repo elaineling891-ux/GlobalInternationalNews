@@ -7,9 +7,16 @@
     <h2>{{ category }}</h2>
     <ul>
         {% for news in news_list %}
-        <li>
-            <a href="/news/{{ news.id }}">{{ news.title }}</a>
-            <span class="date">{{ news.created_at.strftime('%Y-%m-%d') }}</span>
+        <li class="news-item">
+            {% if news.image_url %}
+            <a href="/news/{{ news.id }}">
+                <img src="{{ news.image_url }}" alt="{{ news.title }}" class="news-thumb">
+            </a>
+            {% endif %}
+            <div class="news-info">
+                <a href="/news/{{ news.id }}" class="news-title">{{ news.title }}</a>
+                <span class="date">{{ news.created_at.strftime('%Y-%m-%d') }}</span>
+            </div>
         </li>
         {% endfor %}
     </ul>
