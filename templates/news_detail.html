@@ -6,9 +6,9 @@
     <p class="news-date">{{ news.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
 
     {% if news.image_url %}
-        <div class="news-image-wrapper">
-            <img src="{{ news.image_url }}" alt="{{ news.title }}" class="news-image">
-        </div>
+    <div class="news-image-wrapper">
+        <img src="{{ news.image_url }}" alt="{{ news.title }}" class="news-image">
+    </div>
     {% endif %}
 
     <div class="news-content">
