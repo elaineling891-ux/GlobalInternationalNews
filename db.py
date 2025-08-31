@@ -25,6 +25,9 @@ def get_conn():
     cursor.close()
     return conn
 
+# ----------------------
+# 初始化数据库
+# ----------------------
 def init_db():
     conn = get_conn()
     cur = conn.cursor()
@@ -35,6 +38,7 @@ def init_db():
         content TEXT,
         link VARCHAR(500),
         image_url TEXT,
+        category VARCHAR(50),  -- ✅ 分类字段
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         UNIQUE KEY unique_link (link(191)),
         UNIQUE KEY unique_title (title(191))
@@ -45,6 +49,9 @@ def init_db():
     conn.close()
     print("✅ 数据库初始化完成（created_at 默认 SGT）")
 
+# ----------------------
+# 插入
+# ----------------------
 def insert_news(title, content, link=None, image_url=None, category=None):
     if not title or not content:
         print("⚠️ 跳过插入：title 或 content 为空")
@@ -60,6 +67,9 @@ def insert_news(title, content, link=None, image_url=None, category=None):
     cur.close()
     conn.close()
 
+# ----------------------
+# 查询
+# ----------------------
 def get_all_news(skip=0, limit=20, category=None):
     conn = get_conn()
     cur = conn.cursor()
@@ -81,9 +91,8 @@ def get_all_news(skip=0, limit=20, category=None):
     rows = cur.fetchall()
     cur.close()
     conn.close()
-    news = []
-    for row in rows:
-        news.append({
+    return [
+        {
             "id": row[0],
             "title": row[1],
             "content": row[2],
@@ -91,8 +100,8 @@ def get_all_news(skip=0, limit=20, category=None):
             "image_url": row[4],
             "category": row[5],
             "created_at": row[6],
-        })
-    return news
+        } for row in rows
+    ]
 
 def get_news_by_id(news_id: int):
     conn = get_conn()
@@ -128,7 +137,7 @@ def news_exists(link: str) -> bool:
     cur.close()
     conn.close()
     return exists
-    
+
 def update_news(news_id, title, content, link=None, image_url=None, category=None):
     conn = get_conn()
     cur = conn.cursor()
@@ -136,7 +145,7 @@ def update_news(news_id, title, content, link=None, image_url=None, category=Non
         UPDATE news
         SET title=%s, content=%s, link=%s, image_url=%s, category=%s
         WHERE id=%s
-    """, (title, content, link, image_url, news_id, category))
+    """, (title, content, link, image_url, category, news_id))  # ✅ 顺序修正
     conn.commit()
     cur.close()
     conn.close()
@@ -161,19 +170,9 @@ def get_all_db():
     conn.close()
     return columns, rows
 
-def fetch_news_by_id(news_id):
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute(
-        "SELECT id, title, image_url, content FROM news WHERE id=?",
-        (news_id,),
-    )
-    row = cur.fetchone()
-    conn.close()
-    if row:
-        return {"id": row[0], "title": row[1], "image_url": row[2], "content": row[3]}
-    return None
-
+# ----------------------
+# 分类相关
+# ----------------------
 def fetch_news_by_category(category, skip=0, limit=20):
     conn = get_conn()
     cur = conn.cursor()
@@ -187,10 +186,8 @@ def fetch_news_by_category(category, skip=0, limit=20):
     rows = cur.fetchall()
     cur.close()
     conn.close()
-
-    news = []
-    for row in rows:
-        news.append({
+    return [
+        {
             "id": row[0],
             "title": row[1],
             "content": row[2],
@@ -198,16 +195,62 @@ def fetch_news_by_category(category, skip=0, limit=20):
             "image_url": row[4],
             "category": row[5],
             "created_at": row[6],
-        })
-    return news
+        } for row in rows
+    ]
 
 def get_news_by_category(category, limit=5):
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        "SELECT id, title, link, summary, created_at FROM news WHERE category=%s ORDER BY created_at DESC LIMIT %s",
-        (category, limit)
-    )
-    rows = cursor.fetchall()
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT id, title, content, link, image_url, category, created_at
+        FROM news
+        WHERE category=%s
+        ORDER BY created_at DESC
+        LIMIT %s
+    """, (category, limit))
+    rows = cur.fetchall()
+    cur.close()
     conn.close()
-    return rows
+    return [
+        {
+            "id": row[0],
+            "title": row[1],
+            "content": row[2],
+            "link": row[3],
+            "image_url": row[4],
+            "category": row[5],
+            "created_at": row[6],
+        } for row in rows
+    ]
+
+def get_news_grouped_by_category(limit=5):
+    """返回按分类分组的新闻"""
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute("SELECT DISTINCT category FROM news ORDER BY category")
+    categories = [row[0] for row in cur.fetchall() if row[0]]
+
+    result = {}
+    for cat in categories:
+        cur.execute("""
+            SELECT id, title, content, link, image_url, category, created_at
+            FROM news
+            WHERE category=%s
+            ORDER BY created_at DESC
+            LIMIT %s
+        """, (cat, limit))
+        rows = cur.fetchall()
+        result[cat] = [
+            {
+                "id": r[0],
+                "title": r[1],
+                "content": r[2],
+                "link": r[3],
+                "image_url": r[4],
+                "category": r[5],
+                "created_at": r[6],
+            } for r in rows
+        ]
+    cur.close()
+    conn.close()
+    return result
