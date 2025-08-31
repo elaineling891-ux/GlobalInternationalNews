@@ -2,12 +2,13 @@
 
 {% block content %}
 <h1>最新新闻</h1>
+
 {% for category, news_list in category_news.items() %}
 <section class="category-section">
     <h2>{{ category }}</h2>
-    <ul class="news-list">
-        {% for news in news_list %}
-        <li class="news-item">
+    <div class="news-grid">
+        {% for news in news_list[:5] %}
+        <div class="news-card">
             {% if news.image_url %}
             <a href="/news/{{ news.id }}" class="news-thumb-link">
                 <img src="{{ news.image_url }}" alt="{{ news.title }}" class="news-thumb">
@@ -17,10 +18,11 @@
                 <a href="/news/{{ news.id }}" class="news-title">{{ news.title }}</a>
                 <span class="date">{{ news.created_at.strftime('%Y-%m-%d') }}</span>
             </div>
-        </li>
+        </div>
         {% endfor %}
-    </ul>
+    </div>
     <a class="see-more" href="/category/{{ category }}?page=1">查看更多 {{ category }} 新闻 &raquo;</a>
 </section>
 {% endfor %}
+
 {% endblock %}
