@@ -173,6 +173,16 @@ def get_all_db():
 # ----------------------
 # 分类相关
 # ----------------------
+def get_all_categories():
+    """获取所有不同的分类"""
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute("SELECT DISTINCT category FROM news WHERE category IS NOT NULL AND category <> '' ORDER BY category")
+    rows = [row[0] for row in cur.fetchall()]
+    cur.close()
+    conn.close()
+    return rows
+
 def fetch_news_by_category(category, skip=0, limit=20):
     conn = get_conn()
     cur = conn.cursor()
@@ -224,13 +234,11 @@ def get_news_by_category(category, limit=5):
     ]
 
 def get_news_grouped_by_category(limit=5):
-    """返回按分类分组的新闻"""
+    """返回 {分类名: [新闻列表]}"""
+    categories = get_all_categories()
+    result = {}
     conn = get_conn()
     cur = conn.cursor()
-    cur.execute("SELECT DISTINCT category FROM news ORDER BY category")
-    categories = [row[0] for row in cur.fetchall() if row[0]]
-
-    result = {}
     for cat in categories:
         cur.execute("""
             SELECT id, title, content, link, image_url, category, created_at
