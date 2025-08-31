@@ -160,3 +160,16 @@ def get_all_db():
     cur.close()
     conn.close()
     return columns, rows
+
+def fetch_news_by_id(news_id):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT id, title, image_url, content FROM news WHERE id=?",
+        (news_id,),
+    )
+    row = cur.fetchone()
+    conn.close()
+    if row:
+        return {"id": row[0], "title": row[1], "image_url": row[2], "content": row[3]}
+    return None
