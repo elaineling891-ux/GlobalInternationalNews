@@ -1,15 +1,23 @@
 {% extends "base.html" %}
+
+{% block title %}{{ category }} - 我的新闻网站{% endblock %}
+
 {% block content %}
-<div class="container">
-  <h2>{{ category }} 新闻</h2>
-  <ul class="news-list">
-    {% for n in news_list %}
-      <li>
-        <a href="/news/{{ n[0] }}">{{ n[1] }}</a>
-        <span class="date">{{ n[4].strftime("%Y-%m-%d %H:%M") }}</span>
-        <p class="summary">{{ n[3] }}</p>
-      </li>
-    {% endfor %}
-  </ul>
-</div>
+    <h2>{{ category }} 新闻</h2>
+
+    {% if news_list %}
+        <ul class="news-list">
+            {% for news in news_list %}
+            <li>
+                <a href="/news/{{ news.id }}">
+                    <h4>{{ news.title }}</h4>
+                    <p>{{ news.content[:100] }}...</p>
+                    <small>{{ news.created_at }}</small>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>目前没有该分类的新闻。</p>
+    {% endif %}
 {% endblock %}
