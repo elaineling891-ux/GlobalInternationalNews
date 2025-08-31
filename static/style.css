@@ -1,13 +1,14 @@
-
-*{box-sizing:border-box}
-body{font-family:Arial,'Noto Sans SC',sans-serif;margin:0;color:#222}
-header{padding:24px 16px;text-align:center;border-bottom:1px solid #eee}
-h1{margin:0 0 8px}
-.muted{color:#666;font-size:14px}
-main{max-width:900px;margin:10px auto;padding:0 12px}
-.news-list{list-style:none;margin:0;padding:0}
-.news-item{padding:12px 0;border-bottom:1px solid #f0f0f0}
-.title{color:#111;font-weight:600;text-decoration:none}
-.title:hover{text-decoration:underline}
-.meta{color:#888;font-size:12px;margin-top:6px}
-.ads{max-width:900px;margin:16px auto;text-align:center;padding:8px 0}
+.news-thumb {
+    width: 150px;      /* 缩略图宽度 */
+    height: auto;      /* 高度自动保持比例 */
+    object-fit: cover; /* 超出部分裁剪，保持填充 */
+    border-radius: 4px; /* 可选，圆角 */
+}
+.news-item {
+    display: flex;
+    gap: 10px;         /* 图片和文字间距 */
+    align-items: flex-start;
+}
+.news-info {
+    flex: 1;           /* 文字占剩余空间 */
+}
