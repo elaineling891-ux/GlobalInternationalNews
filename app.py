@@ -6,7 +6,8 @@ from datetime import datetime
 
 from db import (
     init_db, get_all_news, get_news_by_id, insert_news,
-    update_news, delete_news, get_news_by_category, get_news_grouped_by_category
+    update_news, delete_news,
+    get_news_by_category, get_news_grouped_by_category
 )
 
 app = FastAPI()
@@ -66,7 +67,7 @@ async def add_news(
     content: str = Form(...),
     link: str = Form(None),
     image_url: str = Form(None),
-    category: str = Form(...)
+    category: str = Form(None)
 ):
     insert_news(title, content, link, image_url, category)
     return RedirectResponse(url="/", status_code=303)
@@ -80,7 +81,7 @@ async def edit_news(
     content: str = Form(...),
     link: str = Form(None),
     image_url: str = Form(None),
-    category: str = Form(...)
+    category: str = Form(None)
 ):
     update_news(news_id, title, content, link, image_url, category)
     return RedirectResponse(url=f"/news/{news_id}", status_code=303)
