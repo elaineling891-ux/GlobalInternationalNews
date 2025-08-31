@@ -1,3 +1,22 @@
+/* 通用 */
+body {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background: #f9f9f9;
+    color: #333;
+}
+
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
 /* 分类新闻列表 */
 .news-list {
     list-style: none;
@@ -7,7 +26,7 @@
 
 .news-item {
     display: flex;
-    flex-wrap: wrap; /* 手机时换行 */
+    flex-wrap: wrap;
     align-items: flex-start;
     margin-bottom: 1em;
     border-bottom: 1px solid #ddd;
@@ -30,18 +49,12 @@
     flex: 1;
 }
 
-.news-title {
+.news-list .news-title {
     font-size: 1.1em;
     font-weight: bold;
-    text-decoration: none;
-    color: #333;
 }
 
-.news-title:hover {
-    text-decoration: underline;
-}
-
-.date {
+.news-list .date {
     display: block;
     color: #999;
     font-size: 0.9em;
@@ -51,49 +64,47 @@
 .see-more {
     display: inline-block;
     margin-top: 0.5em;
-    color: #007bff;
-    text-decoration: none;
+    font-weight: bold;
 }
 
-.see-more:hover {
-    text-decoration: underline;
-}
-
+/* 新闻详情页 */
 .news-detail {
     max-width: 800px;
-    margin: 0 auto;
+    margin: 1em auto;
     padding: 1em;
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
-.news-title {
+.news-detail .news-title {
     font-size: 1.8em;
     font-weight: bold;
     margin-bottom: 0.5em;
 }
 
-.news-date {
+.news-detail .news-date {
     color: #999;
     font-size: 0.9em;
     margin-bottom: 1em;
 }
 
-.news-image-wrapper {
+.news-detail .news-image-wrapper {
     text-align: center;
     margin-bottom: 1.5em;
 }
 
-.news-image {
+.news-detail .news-image {
     max-width: 100%;
     height: auto;
     border-radius: 6px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-.news-content p {
+.news-detail .news-content p {
     margin-bottom: 1.5em;
     line-height: 1.7;
     font-size: 1em;
-    color: #333;
 }
 
 /* 手机适配 */
@@ -112,11 +123,11 @@
         padding: 0.5em;
     }
 
-    .news-title {
+    .news-detail .news-title {
         font-size: 1.5em;
     }
 
-    .news-content p {
+    .news-detail .news-content p {
         font-size: 0.95em;
     }
 }
