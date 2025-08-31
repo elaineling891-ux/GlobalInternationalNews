@@ -4,12 +4,17 @@
 <article class="news-detail">
     <h1>{{ news.title }}</h1>
     <p class="date">{{ news.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+
     {% if news.image_url %}
-        <img src="{{ news.image_url }}" alt="{{ news.title }}">
+        <img src="{{ news.image_url }}" alt="{{ news.title }}" style="max-width:100%;height:auto;">
     {% endif %}
+
     <div class="content">
-        {{ news.content | safe }}
+        {% for paragraph in news.content.split('\n\n') %}
+            <p>{{ paragraph }}</p>
+        {% endfor %}
     </div>
+
     {% if news.link %}
         <p>来源: <a href="{{ news.link }}" target="_blank">{{ news.link }}</a></p>
     {% endif %}
