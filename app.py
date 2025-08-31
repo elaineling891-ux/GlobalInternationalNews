@@ -12,10 +12,8 @@ from db import (
 
 app = FastAPI()
 
-# 静态文件 (CSS/JS/图片)
+# 静态文件
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# 模板路径
 templates = Jinja2Templates(directory="templates")
 
 
@@ -24,7 +22,7 @@ def startup_event():
     init_db()
 
 
-# 首页：按分类显示新闻
+# 首页
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     category_news = get_news_grouped_by_category(limit=5)
@@ -47,7 +45,7 @@ async def category_page(request: Request, category: str):
     })
 
 
-# 新闻详情页
+# 详情页
 @app.get("/news/{news_id}", response_class=HTMLResponse)
 async def news_detail(request: Request, news_id: int):
     news = get_news_by_id(news_id)
@@ -60,7 +58,25 @@ async def news_detail(request: Request, news_id: int):
     })
 
 
-# 后台新增新闻
+# ===== Admin 页面 =====
+
+# 后台管理首页（显示所有新闻 + 管理按钮）
+@app.get("/admin", response_class=HTMLResponse)
+async def admin_dashboard(request: Request):
+    news_list = get_all_news()
+    return templates.TemplateResponse("admin_dashboard.html", {
+        "request": request,
+        "news_list": news_list
+    })
+
+
+# 新增新闻页面
+@app.get("/admin/add", response_class=HTMLResponse)
+async def add_news_form(request: Request):
+    return templates.TemplateResponse("admin_add.html", {"request": request})
+
+
+# 新增新闻提交
 @app.post("/admin/add")
 async def add_news(
     title: str = Form(...),
@@ -70,10 +86,22 @@ async def add_news(
     category: str = Form(None)
 ):
     insert_news(title, content, link, image_url, category)
-    return RedirectResponse(url="/", status_code=303)
+    return RedirectResponse(url="/admin", status_code=303)
 
 
-# 后台更新新闻
+# 编辑新闻页面
+@app.get("/admin/edit/{news_id}", response_class=HTMLResponse)
+async def edit_news_form(request: Request, news_id: int):
+    news = get_news_by_id(news_id)
+    if not news:
+        return HTMLResponse(content="News not found", status_code=404)
+    return templates.TemplateResponse("admin_edit.html", {
+        "request": request,
+        "news": news
+    })
+
+
+# 提交修改
 @app.post("/admin/update/{news_id}")
 async def edit_news(
     news_id: int,
@@ -84,11 +112,11 @@ async def edit_news(
     category: str = Form(None)
 ):
     update_news(news_id, title, content, link, image_url, category)
-    return RedirectResponse(url=f"/news/{news_id}", status_code=303)
+    return RedirectResponse(url="/admin", status_code=303)
 
 
 # 删除新闻
 @app.get("/admin/delete/{news_id}")
 async def remove_news(news_id: int):
     delete_news(news_id)
-    return RedirectResponse(url="/", status_code=303)
+    return RedirectResponse(url="/admin", status_code=303)
