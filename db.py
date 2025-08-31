@@ -208,30 +208,35 @@ def fetch_news_by_category(category, skip=0, limit=20):
         } for row in rows
     ]
 
-def get_news_by_category(category, limit=5):
+def get_news_grouped_by_category(limit=5):
+    """返回 {分类名: [新闻列表]}"""
+    categories = get_all_categories()
+    result = {}
     conn = get_conn()
     cur = conn.cursor()
-    cur.execute("""
-        SELECT id, title, content, link, image_url, category, created_at
-        FROM news
-        WHERE category=%s
-        ORDER BY created_at DESC
-        LIMIT %s
-    """, (category, limit))
-    rows = cur.fetchall()
+    for cat in categories:
+        cur.execute("""
+            SELECT id, title, content, link, image_url, category, created_at
+            FROM news
+            WHERE category=%s
+            ORDER BY created_at DESC
+            LIMIT %s
+        """, (cat, limit))
+        rows = cur.fetchall()
+        result[cat] = [
+            {
+                "id": r[0],
+                "title": r[1],
+                "content": r[2],
+                "link": r[3],
+                "image_url": r[4],
+                "category": r[5],
+                "created_at": r[6],
+            } for r in rows
+        ]
     cur.close()
     conn.close()
-    return [
-        {
-            "id": row[0],
-            "title": row[1],
-            "content": row[2],
-            "link": row[3],
-            "image_url": row[4],
-            "category": row[5],
-            "created_at": row[6],
-        } for row in rows
-    ]
+    return result
 
 def get_news_by_category(category, limit=20, offset=0):
     conn = get_conn()
