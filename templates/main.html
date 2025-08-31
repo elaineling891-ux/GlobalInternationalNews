@@ -5,11 +5,11 @@
 {% for category, news_list in category_news.items() %}
 <section class="category-section">
     <h2>{{ category }}</h2>
-    <ul>
+    <ul class="news-list">
         {% for news in news_list %}
         <li class="news-item">
             {% if news.image_url %}
-            <a href="/news/{{ news.id }}">
+            <a href="/news/{{ news.id }}" class="news-thumb-link">
                 <img src="{{ news.image_url }}" alt="{{ news.title }}" class="news-thumb">
             </a>
             {% endif %}
