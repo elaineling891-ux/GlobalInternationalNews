@@ -200,3 +200,14 @@ def fetch_news_by_category(category, skip=0, limit=20):
             "created_at": row[6],
         })
     return news
+
+def get_news_by_category(category, limit=5):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT id, title, link, summary, created_at FROM news WHERE category=%s ORDER BY created_at DESC LIMIT %s",
+        (category, limit)
+    )
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
