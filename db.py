@@ -45,30 +45,39 @@ def init_db():
     conn.close()
     print("✅ 数据库初始化完成（created_at 默认 SGT）")
 
-def insert_news(title, content, link=None, image_url=None):
+def insert_news(title, content, link=None, image_url=None, category=None):
     if not title or not content:
         print("⚠️ 跳过插入：title 或 content 为空")
         return
     conn = get_conn()
     cur = conn.cursor()
     cur.execute("""
-        INSERT INTO news (title, content, link, image_url)
-        VALUES (%s, %s, %s, %s)
+        INSERT INTO news (title, content, link, image_url, category)
+        VALUES (%s, %s, %s, %s, %s)
         ON DUPLICATE KEY UPDATE link=link
-    """, (title, content, link, image_url))
+    """, (title, content, link, image_url, category))
     conn.commit()
     cur.close()
     conn.close()
 
-def get_all_news(skip=0, limit=20):
+def get_all_news(skip=0, limit=20, category=None):
     conn = get_conn()
     cur = conn.cursor()
-    cur.execute("""
-        SELECT id, title, content, link, image_url, created_at
-        FROM news
-        ORDER BY created_at DESC
-        LIMIT %s OFFSET %s
-    """, (limit, skip))
+    if category:
+        cur.execute("""
+            SELECT id, title, content, link, image_url, category, created_at
+            FROM news
+            WHERE category=%s
+            ORDER BY created_at DESC
+            LIMIT %s OFFSET %s
+        """, (category, limit, skip))
+    else:
+        cur.execute("""
+            SELECT id, title, content, link, image_url, category, created_at
+            FROM news
+            ORDER BY created_at DESC
+            LIMIT %s OFFSET %s
+        """, (limit, skip))
     rows = cur.fetchall()
     cur.close()
     conn.close()
@@ -80,7 +89,8 @@ def get_all_news(skip=0, limit=20):
             "content": row[2],
             "link": row[3],
             "image_url": row[4],
-            "created_at": row[5],  # 已是 SGT
+            "category": row[5],
+            "created_at": row[6],
         })
     return news
 
@@ -88,7 +98,7 @@ def get_news_by_id(news_id: int):
     conn = get_conn()
     cur = conn.cursor()
     cur.execute("""
-        SELECT id, title, content, link, image_url, created_at
+        SELECT id, title, content, link, image_url, category, created_at
         FROM news
         WHERE id=%s
         LIMIT 1
@@ -104,7 +114,8 @@ def get_news_by_id(news_id: int):
         "content": row[2],
         "link": row[3],
         "image_url": row[4],
-        "created_at": row[5],
+        "category": row[5],
+        "created_at": row[6],
     }
 
 def news_exists(link: str) -> bool:
@@ -118,14 +129,14 @@ def news_exists(link: str) -> bool:
     conn.close()
     return exists
     
-def update_news(news_id, title, content, link=None, image_url=None):
+def update_news(news_id, title, content, link=None, image_url=None, category=None):
     conn = get_conn()
     cur = conn.cursor()
     cur.execute("""
         UPDATE news
-        SET title=%s, content=%s, link=%s, image_url=%s
+        SET title=%s, content=%s, link=%s, image_url=%s, category=%s
         WHERE id=%s
-    """, (title, content, link, image_url, news_id))
+    """, (title, content, link, image_url, news_id, category))
     conn.commit()
     cur.close()
     conn.close()
