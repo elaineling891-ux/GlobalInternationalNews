@@ -1,14 +1,73 @@
-.news-thumb {
-    width: 150px;      /* 缩略图宽度 */
-    height: auto;      /* 高度自动保持比例 */
-    object-fit: cover; /* 超出部分裁剪，保持填充 */
-    border-radius: 4px; /* 可选，圆角 */
+/* 分类新闻列表 */
+.news-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
+
 .news-item {
     display: flex;
-    gap: 10px;         /* 图片和文字间距 */
+    flex-wrap: wrap; /* 手机时换行 */
     align-items: flex-start;
+    margin-bottom: 1em;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 0.5em;
 }
+
+.news-thumb-link {
+    flex-shrink: 0;
+    margin-right: 1em;
+}
+
+.news-thumb {
+    width: 120px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
 .news-info {
-    flex: 1;           /* 文字占剩余空间 */
+    flex: 1;
+}
+
+.news-title {
+    font-size: 1.1em;
+    font-weight: bold;
+    text-decoration: none;
+    color: #333;
+}
+
+.news-title:hover {
+    text-decoration: underline;
+}
+
+.date {
+    display: block;
+    color: #999;
+    font-size: 0.9em;
+    margin-top: 0.2em;
+}
+
+.see-more {
+    display: inline-block;
+    margin-top: 0.5em;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.see-more:hover {
+    text-decoration: underline;
+}
+
+/* 手机适配 */
+@media screen and (max-width: 600px) {
+    .news-item {
+        flex-direction: column;
+    }
+
+    .news-thumb {
+        width: 100%;
+        height: auto;
+        margin-bottom: 0.5em;
+    }
 }
